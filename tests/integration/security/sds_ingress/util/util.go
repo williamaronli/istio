@@ -48,12 +48,15 @@ const (
 	tlsScrtCert = "tls.crt"
 	// The ID/name for the k8sKey in kubernetes tls secret.
 	tlsScrtKey = "tls.key"
+	// The ID/name for the CA certificate in kubernetes tls secret
+	tlsScrtCaCert = "ca.crt"
 	// The ID/name for the certificate chain in kubernetes generic secret.
 	genericScrtCert = "cert"
 	// The ID/name for the private key in kubernetes generic secret.
 	genericScrtKey = "key"
 	// The ID/name for the CA certificate in kubernetes generic secret.
 	genericScrtCaCert = "cacert"
+
 )
 
 type IngressCredential struct {
@@ -119,6 +122,38 @@ func CreateIngressKubeSecret(t test.Failer, ctx framework.TestContext, credNames
 	}, retry.Timeout(time.Second*5))
 }
 
+func CreateIngressKubeSecretWithMtlsCaCert(t test.Failer, ctx framework.TestContext, credNames []string,
+		ingressType ingress.CallType, ingressCred IngressCredential) {
+	t.Helper()
+	// Get namespace for ingress gateway pod.
+	istioCfg := istio.DefaultConfigOrFail(t, ctx)
+	systemNS := namespace.ClaimOrFail(t, ctx, istioCfg.SystemNamespace)
+
+	if len(credNames) == 0 {
+		ctx.Log("no credential names are specified, skip creating ingress secret")
+		return
+	}
+	// Create Kubernetes secret for ingress gateway
+	kubeAccessor := ctx.Environment().(*kube.Environment).KubeClusters[0]
+	for _, cn := range credNames {
+		secret := createSecretWithMtlsCaCert(ingressType, cn, systemNS.Name(), ingressCred)
+		err := kubeAccessor.CreateSecret(systemNS.Name(), secret)
+		if err != nil {
+			t.Fatalf("Failed to create secret (error: %s)", err)
+		}
+	}
+	// Check if Kubernetes secret is ready
+	retry.UntilSuccessOrFail(t, func() error {
+		for _, cn := range credNames {
+			_, err := kubeAccessor.GetSecret(systemNS.Name()).Get(context.TODO(), cn, metav1.GetOptions{})
+			if err != nil {
+				return fmt.Errorf("secret %v not found: %v", cn, err)
+			}
+		}
+		return nil
+	}, retry.Timeout(time.Second*5))
+}
+
 // DeleteIngressKubeSecret deletes a secret
 // nolint: interfacer
 func DeleteIngressKubeSecret(t test.Failer, ctx framework.TestContext, credNames []string) {
@@ -164,6 +199,20 @@ func createSecret(ingressType ingress.CallType, cn, ns string, ic IngressCredent
 		Data: map[string][]byte{
 			tlsScrtCert: []byte(ic.ServerCert),
 			tlsScrtKey:  []byte(ic.PrivateKey),
+		},
+	}
+}
+
+func createSecretWithMtlsCaCert(ingressType ingress.CallType, cn, ns string, ic IngressCredential) *v1.Secret {
+	return &v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      cn,
+			Namespace: ns,
+		},
+		Data: map[string][]byte{
+			tlsScrtCert: []byte(ic.ServerCert),
+			tlsScrtKey:  []byte(ic.PrivateKey),
+			tlsScrtCaCert: []byte(ic.CaCert),
 		},
 	}
 }

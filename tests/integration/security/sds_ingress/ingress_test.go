@@ -217,6 +217,62 @@ func TestSingleMTLSGateway_CompoundSecretRotation(t *testing.T) {
 		})
 }
 
+func TestSingleMTLSGatewayWithCaCert_CompoundSecretRotation(t *testing.T) {
+	framework.
+		NewTest(t).
+		RequiresEnvironment(environment.Kube).
+			Run(func(ctx framework.TestContext) {
+				var (
+					credName = []string{"testsinglemtlsgateway-compoundsecretrotation"}
+					host     = "testsinglemtlsgatewaywithcacert-compoundsecretrotation.example.com"
+				)
+
+				// Add kubernetes secret to provision key/cert for ingress gateway.
+				ingressutil.CreateIngressKubeSecretWithMtlsCaCert(t, ctx, credName, ingress.Mtls, ingressutil.IngressCredentialA)
+				defer ingressutil.DeleteIngressKubeSecret(t, ctx, credName)
+
+				ns := ingressutil.SetupTest(ctx)
+				ingressutil.SetupConfig(t, ctx, ns, ingressutil.TestConfig{
+					Mode:           "MUTUAL",
+					CredentialName: credName[0],
+					Host:           host,
+				})
+				// Wait for ingress gateway to fetch key/cert from Gateway agent via SDS.
+				ing := ingress.NewOrFail(t, ctx, ingress.Config{Istio: inst})
+				tlsContext := ingressutil.TLSContext{
+					CaCert:     ingressutil.CaCertA,
+					PrivateKey: ingressutil.TLSClientKeyA,
+					Cert:       ingressutil.TLSClientCertA,
+				}
+				err := ingressutil.SendRequest(ing, host, credName[0], ingress.Mtls, tlsContext,
+					ingressutil.ExpectedResponse{ResponseCode: 200, ErrorMessage: ""}, t)
+				if err != nil {
+					t.Fatalf("unable to retrieve 200 from product page at host %s: %v", host, err)
+				}
+
+				// key/cert rotation
+				ingressutil.RotateSecrets(t, ctx, credName, ingress.Mtls, ingressutil.IngressCredentialB)
+				// Use old server CA cert to set up SSL connection would fail.
+				err = ingressutil.SendRequest(ing, host, credName[0], ingress.Mtls, tlsContext,
+					ingressutil.ExpectedResponse{ResponseCode: 0, ErrorMessage: "certificate signed by unknown authority"}, t)
+				if err != nil {
+					t.Fatalf("unable to retrieve 404 from product page at host %s: %v", host, err)
+				}
+
+				// Use new server CA cert to set up SSL connection.
+				tlsContext = ingressutil.TLSContext{
+					CaCert:     ingressutil.CaCertB,
+					PrivateKey: ingressutil.TLSClientKeyB,
+					Cert:       ingressutil.TLSClientCertB,
+				}
+				err = ingressutil.SendRequest(ing, host, credName[0], ingress.Mtls, tlsContext,
+					ingressutil.ExpectedResponse{ResponseCode: 200, ErrorMessage: ""}, t)
+				if err != nil {
+					t.Fatalf("unable to retrieve 200 from product page at host %s: %v", host, err)
+				}
+			})
+}
+
 // TestTlsGateways deploys multiple TLS gateways with SDS enabled, and creates kubernetes that store
 // private key and server certificate for each TLS gateway. Verifies that all gateways are able to terminate
 // SSL connections successfully.
