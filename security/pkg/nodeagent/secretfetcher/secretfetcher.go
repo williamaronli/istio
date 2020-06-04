@@ -528,7 +528,7 @@ func (sf *SecretFetcher) FindIngressGatewaySecret(key string) (secret model.Secr
 			secretFetcherLog.Debugf("Return fallback secret %s for gateway secret %s", sf.FallbackSecretName, key)
 			return fallbackVal.(model.SecretItem), true
 		}
-
+		secretFetcherLog.Errorf("=======111111======")
 		secretFetcherLog.Errorf("cannot find secret %s and cannot find fallback secret %s", key, sf.FallbackSecretName)
 		return model.SecretItem{}, false
 	}
