@@ -285,7 +285,7 @@ func (sc *SecretCache) GenerateSecret(ctx context.Context, connectionID, resourc
 				logPrefix, err)
 			return nil, err
 		}
-
+		cacheLog.Infof("0000000")
 		cacheLog.Infoa("GenerateSecret ", resourceName)
 		sc.secrets.Store(connKey, *ns)
 		return ns, nil
