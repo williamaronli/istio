@@ -524,10 +524,12 @@ func (sf *SecretFetcher) FindIngressGatewaySecret(key string) (secret model.Secr
 		// TODO(JimmyCYJ): Add metrics to node agent to imply usage of fallback secret
 		secretFetcherLog.Warnf("Cannot find secret %s, searching for fallback secret %s", key, sf.FallbackSecretName)
 		fallbackVal, fallbackExist := sf.secrets.Load(sf.FallbackSecretName)
+		secretFetcherLog.Infof("Return fallback secret %s for gateway secret %s", sf.FallbackSecretName, key)
 		if fallbackExist {
 			secretFetcherLog.Debugf("Return fallback secret %s for gateway secret %s", sf.FallbackSecretName, key)
 			return fallbackVal.(model.SecretItem), true
 		}
+
 		secretFetcherLog.Errorf("=======111111======")
 		secretFetcherLog.Errorf("cannot find secret %s and cannot find fallback secret %s", key, sf.FallbackSecretName)
 		return model.SecretItem{}, false

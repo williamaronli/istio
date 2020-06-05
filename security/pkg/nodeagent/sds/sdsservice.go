@@ -41,6 +41,7 @@ import (
 	"istio.io/istio/security/pkg/nodeagent/cache"
 	"istio.io/istio/security/pkg/nodeagent/model"
 	"istio.io/pkg/log"
+	"runtime/debug"
 )
 
 const (
@@ -269,7 +270,9 @@ func (s *sdsservice) StreamSecrets(stream sds.SecretDiscoveryService_StreamSecre
 				}
 				addConn(key, con)
 				firstRequestFlag = true
+				sdsServiceLog.Info("111111111")
 				sdsServiceLog.Infof("%s new connection", sdsLogPrefix(resourceName))
+				sdsServiceLog.Info("2222222")
 			}
 			conID := con.conID
 
@@ -473,6 +476,12 @@ func NotifyProxy(connKey cache.ConnKey, secret *model.SecretItem) error {
 	conIDresourceNamePrefix := sdsLogPrefix(connKey.ResourceName)
 	sdsClientsMutex.Lock()
 	conn := sdsClients[connKey]
+	sdsServiceLog.Infof("test333333333")
+	sdsServiceLog.Infof("%s",len(sdsClients))
+	for key, element := range sdsClients {
+		fmt.Println("Key:", key, "=>", "Element:", element)
+	}
+	debug.PrintStack()
 	if conn == nil {
 		sdsClientsMutex.Unlock()
 		sdsServiceLog.Errorf("%s NotifyProxy failed. No connection with id %q can be found",
