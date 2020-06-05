@@ -478,6 +478,7 @@ func NotifyProxy(connKey cache.ConnKey, secret *model.SecretItem) error {
 	conn := sdsClients[connKey]
 	sdsServiceLog.Infof("test333333333")
 	sdsServiceLog.Infof("%s",len(sdsClients))
+	sdsServiceLog.Infof("%s",connKey.ConnectionID)
 	for key, element := range sdsClients {
 		fmt.Println("Key:", key, "=>", "Element:", element)
 	}
