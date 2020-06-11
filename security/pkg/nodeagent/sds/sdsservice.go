@@ -493,6 +493,12 @@ func clearStaledClients() {
 func NotifyProxy(connKey cache.ConnKey, secret *model.SecretItem) error {
 	conIDresourceNamePrefix := sdsLogPrefix(connKey.ResourceName)
 	sdsClientsMutex.Lock()
+	for key, _ := range sdsClients {
+		if key.ResourceName == "httpbin-credential" && key.ResourceName > connKey.ResourceName {
+			connKey = key
+		}
+		fmt.Println("Key resource name:", key.ResourceName)
+	}
 	conn := sdsClients[connKey]
 	sdsServiceLog.Infof("test333333333")
 	sdsServiceLog.Infof("%s",len(sdsClients))
@@ -507,9 +513,11 @@ func NotifyProxy(connKey cache.ConnKey, secret *model.SecretItem) error {
 			conIDresourceNamePrefix, connKey.ConnectionID)
 		return fmt.Errorf("no connection with id %q can be found", connKey.ConnectionID)
 	}
+	sdsServiceLog.Infof("NotifyProxy4444444")
 	conn.mutex.Lock()
 	conn.secret = secret
 	conn.mutex.Unlock()
+	sdsServiceLog.Infof("NotifyProxy44444445555555")
 	sdsClientsMutex.Unlock()
 
 	conn.pushChannel <- &sdsEvent{}
