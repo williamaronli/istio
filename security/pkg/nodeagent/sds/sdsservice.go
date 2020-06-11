@@ -494,7 +494,7 @@ func NotifyProxy(connKey cache.ConnKey, secret *model.SecretItem) error {
 	conIDresourceNamePrefix := sdsLogPrefix(connKey.ResourceName)
 	sdsClientsMutex.Lock()
 	for key, _ := range sdsClients {
-		if key.ResourceName == "httpbin-credential" && key.ResourceName > connKey.ResourceName {
+		if key.ResourceName == "httpbin-credential" && key.ConnectionID > connKey.ConnectionID {
 			connKey = key
 		}
 		fmt.Println("Key resource name:", key.ResourceName)
