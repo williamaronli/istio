@@ -522,6 +522,13 @@ func (sc *SecretCache) DeleteK8sSecret(secretName string) {
 func (sc *SecretCache) UpdateK8sSecret(secretName string, ns model.SecretItem) {
 	var secretMap sync.Map
 	wg := sync.WaitGroup{}
+	cacheLog.Infof("UpdateK8sSecret")
+	sc.secrets.Range(func(k interface{}, v interface{}) bool {
+		cacheLog.Infof("ConnKey: %s", k.(ConnKey))
+		oldSecret := v.(model.SecretItem)
+		cacheLog.Infof("ConnKey: %s", oldSecret)
+		return true
+	})
 	sc.secrets.Range(func(k interface{}, v interface{}) bool {
 		cacheLog.Infof("cachelog111111111")
 
