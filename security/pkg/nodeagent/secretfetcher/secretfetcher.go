@@ -312,15 +312,17 @@ func (sf *SecretFetcher) scrtAdded(obj interface{}) {
 		// Load server key/cert from k8s secret and update cache.
 		sf.secrets.Delete(newSecret.ResourceName)
 		sf.secrets.Store(newSecret.ResourceName, *newSecret)
-		secretFetcherLog.Debugf("secret %s is added as a server certificate", newSecret.ResourceName)
+		secretFetcherLog.Infof("secret %s is added as a server certificate", newSecret.ResourceName)
 		if sf.AddCache != nil {
 			sf.AddCache(newSecret.ResourceName, *newSecret)
 		}
+		secretFetcherLog.Infof("3333333")
+		secretFetcherLog.Infof("certificateAuthorityNewSecret: %s", certificateAuthorityNewSecret)
 		if certificateAuthorityNewSecret != nil {
 			// Load client CA cert from compound k8s secret and update cache.
 			sf.secrets.Delete(certificateAuthorityNewSecret.ResourceName)
 			sf.secrets.Store(certificateAuthorityNewSecret.ResourceName, *certificateAuthorityNewSecret)
-			secretFetcherLog.Debugf("secret %s is added as a client CA cert (from a compound Secret)", certificateAuthorityNewSecret.ResourceName)
+			secretFetcherLog.Infof("secret %s is added as a client CA cert (from a compound Secret)", certificateAuthorityNewSecret.ResourceName)
 			if sf.AddCache != nil {
 				sf.AddCache(certificateAuthorityNewSecret.ResourceName, *certificateAuthorityNewSecret)
 			}

@@ -467,12 +467,20 @@ func (s *sdsservice) clearStaledClientsJob() {
 }
 
 func clearStaledClients() {
-	sdsServiceLog.Debug("start staled connection cleanup job")
+	sdsServiceLog.Infof("start staled connection cleanup job")
 	sdsClientsMutex.Lock()
 	defer sdsClientsMutex.Unlock()
+	sdsServiceLog.Infof("staledClientKeys====")
+	for key, element := range staledClientKeys {
+		fmt.Println("Key:", key, "=>", "Element:", element)
+	}
+	sdsServiceLog.Infof("sdsClients====")
+	for key, element := range sdsClients {
+		fmt.Println("Key:", key, "=>", "Element:", element)
+	}
 
 	for connKey := range staledClientKeys {
-		sdsServiceLog.Debugf("remove staled clients %+v", connKey)
+		sdsServiceLog.Infof("remove staled clients %+v", connKey)
 		delete(sdsClients, connKey)
 		delete(staledClientKeys, connKey)
 		// totalStaleConnCounts should be 0 when the for loop finishes.
@@ -488,7 +496,7 @@ func NotifyProxy(connKey cache.ConnKey, secret *model.SecretItem) error {
 	conn := sdsClients[connKey]
 	sdsServiceLog.Infof("test333333333")
 	sdsServiceLog.Infof("%s",len(sdsClients))
-	sdsServiceLog.Infof("%s",connKey.ConnectionID)
+	sdsServiceLog.Infof("%s",connKey)
 	for key, element := range sdsClients {
 		fmt.Println("Key:", key, "=>", "Element:", element)
 	}
@@ -513,7 +521,10 @@ func recycleConnection(conID, resourceName string) {
 		ConnectionID: conID,
 		ResourceName: resourceName,
 	}
-
+	sdsServiceLog.Infof("recycleConnection")
+	for key, element := range staledClientKeys {
+		sdsServiceLog.Infof("Key: %s =>Element:", key, element)
+	}
 	sdsClientsMutex.Lock()
 	defer sdsClientsMutex.Unlock()
 

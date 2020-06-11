@@ -286,7 +286,7 @@ func (sc *SecretCache) GenerateSecret(ctx context.Context, connectionID, resourc
 			return nil, err
 		}
 		cacheLog.Infof("0000000")
-		cacheLog.Infoa("GenerateSecret ", resourceName)
+		cacheLog.Infof("GenerateSecret ", resourceName)
 		sc.secrets.Store(connKey, *ns)
 		return ns, nil
 	}
@@ -523,7 +523,10 @@ func (sc *SecretCache) UpdateK8sSecret(secretName string, ns model.SecretItem) {
 	var secretMap sync.Map
 	wg := sync.WaitGroup{}
 	sc.secrets.Range(func(k interface{}, v interface{}) bool {
+		cacheLog.Infof("cachelog111111111")
+
 		connKey := k.(ConnKey)
+		cacheLog.Infof("Connkey: %s ", connKey)
 		oldSecret := v.(model.SecretItem)
 		if connKey.ResourceName == secretName {
 			wg.Add(1)
@@ -551,7 +554,8 @@ func (sc *SecretCache) UpdateK8sSecret(secretName string, ns model.SecretItem) {
 					}
 				}
 				secretMap.Store(connKey, newSecret)
-				cacheLog.Debugf("%s secret cache is updated", cacheLogPrefix(secretName))
+				cacheLog.Infof("%s secret cache is updated", cacheLogPrefix(secretName))
+				cacheLog.Infof("Callback Connkey: %s ", connKey)
 				sc.callbackWithTimeout(connKey, newSecret)
 			}()
 			// Currently only one ingress gateway is running, therefore there is at most one cache entry.
