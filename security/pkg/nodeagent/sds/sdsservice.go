@@ -318,13 +318,13 @@ func (s *sdsservice) StreamSecrets(stream sds.SecretDiscoveryService_StreamSecre
 			// request's <token, resourceName, Version>, then this request is a confirmation request.
 			// nodeagent stops sending response to envoy in this case.
 			if discReq.VersionInfo != "" && s.st.SecretExist(conID, resourceName, token, discReq.VersionInfo) {
-				sdsServiceLog.Debugf("%s received SDS ACK from proxy %q, version info %q, "+
+				sdsServiceLog.Infof("%s received SDS ACK from proxy %q, version info %q, "+
 					"error details %s\n", conIDresourceNamePrefix, discReq.Node.Id, discReq.VersionInfo,
 					discReq.ErrorDetail)
 				continue
 			}
 
-			sdsServiceLog.Debugf("%s received SDS request from proxy %q, first request: %v, version info %q, "+
+			sdsServiceLog.Infof("%s received SDS request from proxy %q, first request: %v, version info %q, "+
 				"error details %s\n", conIDresourceNamePrefix, discReq.Node.Id, firstRequestFlag, discReq.VersionInfo,
 				discReq.ErrorDetail)
 
@@ -337,7 +337,7 @@ func (s *sdsservice) StreamSecrets(stream sds.SecretDiscoveryService_StreamSecre
 			// File mounted certs for gateways is used in scenarios where an existing PKI infrastuctures delivers certificates
 			// to pods/VMs via files.
 			if s.st.ShouldWaitForIngressGatewaySecret(conID, resourceName, token, s.fileMountedCertsOnly) {
-				sdsServiceLog.Warnf("%s waiting for ingress gateway secret for proxy %q\n", conIDresourceNamePrefix, discReq.Node.Id)
+				sdsServiceLog.Warnf("%s waiting for ingress gateway secret for proxy %q connection id: %q\n", conIDresourceNamePrefix, discReq.Node.Id, conID)
 				continue
 			} else {
 				sdsServiceLog.Infof("Skipping waiting for ingress gateway secret")
@@ -379,7 +379,7 @@ func (s *sdsservice) StreamSecrets(stream sds.SecretDiscoveryService_StreamSecre
 			secret := con.secret
 			con.mutex.RUnlock()
 			conIDresourceNamePrefix := sdsLogPrefix(resourceName)
-			sdsServiceLog.Debugf("%s received push channel request for proxy %q", conIDresourceNamePrefix, proxyID)
+			sdsServiceLog.Infof("%s received push channel request for proxy %q", conIDresourceNamePrefix, proxyID)
 
 			if secret == nil {
 				defer func() {
@@ -391,7 +391,7 @@ func (s *sdsservice) StreamSecrets(stream sds.SecretDiscoveryService_StreamSecre
 				// could connect again with updated token.
 				// When nodeagent stops stream by sending envoy error response, it's Ok not to remove secret
 				// from secret cache because cache has auto-evication.
-				sdsServiceLog.Debugf("%s close connection for proxy %q", conIDresourceNamePrefix, proxyID)
+				sdsServiceLog.Infof("%s close connection for proxy %q", conIDresourceNamePrefix, proxyID)
 				return fmt.Errorf("%s Close connection to proxy %q", conIDresourceNamePrefix, conID)
 			}
 
@@ -588,7 +588,7 @@ func addConn(k cache.ConnKey, conn *sdsConnection) {
 	sdsClientsMutex.Lock()
 	defer sdsClientsMutex.Unlock()
 	conIDresourceNamePrefix := sdsLogPrefix(k.ResourceName)
-	sdsServiceLog.Debugf("%s add a new connection", conIDresourceNamePrefix)
+	sdsServiceLog.Infof("%s add a new connection", conIDresourceNamePrefix)
 	sdsClients[k] = conn
 }
 
@@ -631,11 +631,11 @@ func pushSDS(con *sdsConnection) error {
 	// Update metrics after push to avoid adding latency to SDS push.
 	if secret.RootCert != nil {
 		sdsServiceLog.Infof("%s pushed root cert to proxy", conIDresourceNamePrefix)
-		sdsServiceLog.Debugf("%s pushed root cert %+v to proxy", conIDresourceNamePrefix,
+		sdsServiceLog.Infof("%s pushed root cert %+v to proxy", conIDresourceNamePrefix,
 			string(secret.RootCert))
 	} else {
 		sdsServiceLog.Infof("%s pushed key/cert pair to proxy", conIDresourceNamePrefix)
-		sdsServiceLog.Debugf("%s pushed certificate chain %+v to proxy",
+		sdsServiceLog.Infof("%s pushed certificate chain %+v to proxy",
 			conIDresourceNamePrefix, string(secret.CertificateChain))
 	}
 	totalPushCounts.Increment()

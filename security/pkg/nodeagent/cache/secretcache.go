@@ -324,7 +324,7 @@ func (sc *SecretCache) GenerateSecret(ctx context.Context, connectionID, resourc
 	}
 	cacheLog.Infoa("Loaded root cert from certificate ", resourceName)
 	sc.secrets.Store(connKey, *ns)
-	cacheLog.Debugf("%s successfully generate secret for proxy", logPrefix)
+	cacheLog.Infof("%s successfully generate secret for proxy", logPrefix)
 	return ns, nil
 }
 
@@ -429,7 +429,7 @@ func (sc *SecretCache) ShouldWaitForIngressGatewaySecret(connectionID, resourceN
 	logPrefix := cacheLogPrefix(resourceName)
 	// If node agent works as ingress gateway agent, searches for kubernetes secret and verify secret
 	// is not empty.
-	cacheLog.Debugf("%s calling SecretFetcher to search for secret %s",
+	cacheLog.Infof("%s calling SecretFetcher to search for secret %s",
 		logPrefix, resourceName)
 	_, exist := sc.fetcher.FindIngressGatewaySecret(resourceName)
 	// If kubernetes secret does not exist, need to wait for secret.
@@ -502,7 +502,7 @@ func (sc *SecretCache) DeleteK8sSecret(secretName string) {
 		connKey := k.(ConnKey)
 		if connKey.ResourceName == secretName {
 			sc.secrets.Delete(connKey)
-			cacheLog.Debugf("%s secret cache is deleted", cacheLogPrefix(secretName))
+			cacheLog.Infof("%s secret cache is deleted", cacheLogPrefix(secretName))
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
@@ -608,7 +608,7 @@ func (sc *SecretCache) rotate(updateRootFlag bool) {
 				Version:      now.String(),
 			}
 			secretMap.Store(connKey, ns)
-			cacheLog.Debugf("%s secret cache is updated", logPrefix)
+			cacheLog.Infof("%s secret cache is updated", logPrefix)
 			sc.callbackWithTimeout(connKey, ns)
 
 			return true
@@ -632,7 +632,7 @@ func (sc *SecretCache) rotate(updateRootFlag bool) {
 			atomic.AddUint64(&sc.secretChangedCount, 1)
 			// Send the notification to close the stream if token is expired, so that client could re-connect with a new token.
 			if sc.isTokenExpired(&secret) {
-				cacheLog.Debugf("%s token expired", logPrefix)
+				cacheLog.Infof("%s token expired", logPrefix)
 				// TODO(myidpt): Optimization needed. When using local JWT, server should directly push the new secret instead of
 				// requiring the client to send another SDS request.
 				sc.callbackWithTimeout(connKey, nil /*nil indicates close the streaming connection to proxy*/)
@@ -642,7 +642,7 @@ func (sc *SecretCache) rotate(updateRootFlag bool) {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				cacheLog.Debugf("%s token is still valid, reuse token to generate key/cert", logPrefix)
+				cacheLog.Infof("%s token is still valid, reuse token to generate key/cert", logPrefix)
 
 				// If token is still valid, re-generated the secret and push change to proxy.
 				// Most likey this code path may not necessary, since TTL of cert is much longer than token.
@@ -661,7 +661,7 @@ func (sc *SecretCache) rotate(updateRootFlag bool) {
 				}
 
 				secretMap.Store(connKey, ns)
-				cacheLog.Debugf("%s secret cache is updated", logPrefix)
+				cacheLog.Infof("%s secret cache is updated", logPrefix)
 				sc.callbackWithTimeout(connKey, ns)
 
 			}()
@@ -913,7 +913,7 @@ func (sc *SecretCache) generateSecret(ctx context.Context, token string, connKey
 		return nil, err
 	}
 
-	cacheLog.Debugf("%s received CSR response with certificate chain %+v \n",
+	cacheLog.Infof("%s received CSR response with certificate chain %+v \n",
 		logPrefix, certChainPEM)
 
 	certChain := []byte{}
@@ -966,7 +966,7 @@ func (sc *SecretCache) shouldRotate(secret *model.SecretItem) bool {
 	secretLifeTime := secret.ExpireTime.Sub(secret.CreatedTime)
 	gracePeriod := time.Duration(sc.configOptions.SecretRotationGracePeriodRatio * float64(secretLifeTime))
 	rotate := time.Now().After(secret.ExpireTime.Add(-gracePeriod))
-	cacheLog.Debugf("Secret %s: lifetime: %v, graceperiod: %v, expiration: %v, should rotate: %v",
+	cacheLog.Infof("Secret %s: lifetime: %v, graceperiod: %v, expiration: %v, should rotate: %v",
 		secret.ResourceName, secretLifeTime, gracePeriod, secret.ExpireTime, rotate)
 	return rotate
 }
@@ -994,7 +994,7 @@ func (sc *SecretCache) sendRetriableRequest(ctx context.Context, csrPEM []byte,
 		sc.randMutex.Lock()
 		randomizedInitialBackOffInMS := sc.rand.Int63n(sc.configOptions.InitialBackoffInMilliSec)
 		sc.randMutex.Unlock()
-		cacheLog.Debugf("Wait for %d millisec for jitter", randomizedInitialBackOffInMS)
+		cacheLog.Infof("Wait for %d millisec for jitter", randomizedInitialBackOffInMS)
 		// Add a jitter to initial CSR to avoid thundering herd problem.
 		time.Sleep(time.Duration(randomizedInitialBackOffInMS) * time.Millisecond)
 	}
@@ -1022,7 +1022,7 @@ func (sc *SecretCache) sendRetriableRequest(ctx context.Context, csrPEM []byte,
 			p := sc.configOptions.Plugins[0]
 			exchangedToken, _, httpRespCode, err = p.ExchangeToken(ctx, sc.configOptions.TrustDomain, exchangedToken)
 		}
-		cacheLog.Debugf("%s", requestErrorString)
+		cacheLog.Infof("%s", requestErrorString)
 
 		if err == nil {
 			break
@@ -1061,9 +1061,9 @@ func (sc *SecretCache) sendRetriableRequest(ctx context.Context, csrPEM []byte,
 // workload or another token from a plug in provider.
 func (sc *SecretCache) getExchangedToken(ctx context.Context, k8sJwtToken string, connKey ConnKey) (string, error) {
 	logPrefix := cacheLogPrefix(connKey.ResourceName)
-	cacheLog.Debugf("Start token exchange process for %s", logPrefix)
+	cacheLog.Infof("Start token exchange process for %s", logPrefix)
 	if sc.configOptions.Plugins == nil || len(sc.configOptions.Plugins) == 0 {
-		cacheLog.Debugf("Return k8s token for %s", logPrefix)
+		cacheLog.Infof("Return k8s token for %s", logPrefix)
 		return k8sJwtToken, nil
 	}
 	if len(sc.configOptions.Plugins) > 1 {
@@ -1076,6 +1076,6 @@ func (sc *SecretCache) getExchangedToken(ctx context.Context, k8sJwtToken string
 		cacheLog.Errorf("Failed to exchange token for %s: %v", logPrefix, err)
 		return "", err
 	}
-	cacheLog.Debugf("Token exchange succeeded for %s", logPrefix)
+	cacheLog.Infof("Token exchange succeeded for %s", logPrefix)
 	return exchangedTokens[0], nil
 }
