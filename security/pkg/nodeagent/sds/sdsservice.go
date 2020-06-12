@@ -251,7 +251,7 @@ func (s *sdsservice) StreamSecrets(stream sds.SecretDiscoveryService_StreamSecre
 			}
 
 			if resourceName == "" {
-				sdsServiceLog.Infof("Received empty resource name from %q. No need to respond", discReq.Node.Id)
+				sdsServiceLog.Infof("Received empty resource name from %q. No need to respond connection id: %q\n", discReq.Node.Id, con.conID)
 				continue
 			}
 
@@ -597,7 +597,12 @@ func addConn(k cache.ConnKey, conn *sdsConnection) {
 	defer sdsClientsMutex.Unlock()
 	conIDresourceNamePrefix := sdsLogPrefix(k.ResourceName)
 	sdsServiceLog.Infof("%s add a new connection", conIDresourceNamePrefix)
+	sdsServiceLog.Infof("addConn5555555")
+
 	sdsClients[k] = conn
+	for key, element := range sdsClients {
+		fmt.Println("Key:", key, "=>", "Element:", element)
+	}
 }
 
 func pushSDS(con *sdsConnection) error {
