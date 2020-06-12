@@ -283,7 +283,10 @@ func (s *sdsservice) StreamSecrets(stream sds.SecretDiscoveryService_StreamSecre
 			// Reset SDS push time for new SDS push.
 			con.sdsPushTime = time.Time{}
 			con.mutex.Unlock()
-			defer recycleConnection(conID, resourceName)
+			defer func() {
+				recycleConnection(conID, resourceName)
+				s.st.DeleteSecret(conID, resourceName)
+			}()
 
 			conIDresourceNamePrefix := sdsLogPrefix(resourceName)
 			if s.localJWT {
@@ -458,7 +461,7 @@ func (s *sdsservice) clearStaledClientsJob() {
 	for {
 		select {
 		case <-s.ticker.C:
-			clearStaledClients()
+			clearStaledClients(s)
 		case <-s.closing:
 			if s.ticker != nil {
 				s.ticker.Stop()
@@ -467,7 +470,7 @@ func (s *sdsservice) clearStaledClientsJob() {
 	}
 }
 
-func clearStaledClients() {
+func clearStaledClients(s *sdsservice) {
 	sdsServiceLog.Infof("start staled connection cleanup job")
 	sdsClientsMutex.Lock()
 	defer sdsClientsMutex.Unlock()
@@ -484,6 +487,7 @@ func clearStaledClients() {
 		sdsServiceLog.Infof("remove staled clients %+v", connKey)
 		delete(sdsClients, connKey)
 		delete(staledClientKeys, connKey)
+		//s.st.DeleteSecret(connKey)
 		// totalStaleConnCounts should be 0 when the for loop finishes.
 		totalStaleConnCounts.Decrement()
 	}
@@ -544,7 +548,7 @@ func recycleConnection(conID, resourceName string) {
 	if _, found := staledClientKeys[key]; found {
 		return
 	}
-
+	//s.st.DeleteSecret(conID, resourceName)
 	staledClientKeys[key] = true
 
 	totalStaleConnCounts.Increment()
