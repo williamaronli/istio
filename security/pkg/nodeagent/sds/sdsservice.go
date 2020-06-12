@@ -274,6 +274,7 @@ func (s *sdsservice) StreamSecrets(stream sds.SecretDiscoveryService_StreamSecre
 				addConn(key, con)
 				firstRequestFlag = true
 				sdsServiceLog.Info("111111111")
+				sdsServiceLog.Infof("%s",key.ConnectionID)
 				sdsServiceLog.Infof("%s new connection", sdsLogPrefix(resourceName))
 				sdsServiceLog.Info("2222222")
 			}
