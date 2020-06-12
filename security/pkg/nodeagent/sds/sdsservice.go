@@ -285,7 +285,6 @@ func (s *sdsservice) StreamSecrets(stream sds.SecretDiscoveryService_StreamSecre
 			con.mutex.Unlock()
 			defer func() {
 				recycleConnection(conID, resourceName)
-				s.st.DeleteSecret(conID, resourceName)
 			}()
 
 			conIDresourceNamePrefix := sdsLogPrefix(resourceName)
@@ -347,6 +346,10 @@ func (s *sdsservice) StreamSecrets(stream sds.SecretDiscoveryService_StreamSecre
 				sdsServiceLog.Infof("Skipping waiting for ingress gateway secret")
 			}
 
+			// Remove the secret from cache, otherwise refresh job will process this item(if envoy fails to reconnect)
+			// and cause some confusing logs like 'fails to notify because connection isn't found'.
+			defer s.st.DeleteSecret(conID, resourceName)
+
 			secret, err := s.st.GenerateSecret(ctx, conID, resourceName, token)
 			if err != nil {
 				sdsServiceLog.Errorf("%s Close connection. Failed to get secret for proxy %q from "+
@@ -361,10 +364,6 @@ func (s *sdsservice) StreamSecrets(stream sds.SecretDiscoveryService_StreamSecre
 					conIDresourceNamePrefix, discReq.Node.Id, err)
 				return err
 			}
-
-			// Remove the secret from cache, otherwise refresh job will process this item(if envoy fails to reconnect)
-			// and cause some confusing logs like 'fails to notify because connection isn't found'.
-			defer s.st.DeleteSecret(conID, resourceName)
 
 			con.mutex.Lock()
 			con.secret = secret
