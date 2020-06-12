@@ -330,6 +330,9 @@ func (s *sdsservice) StreamSecrets(stream sds.SecretDiscoveryService_StreamSecre
 			sdsServiceLog.Infof("%s received SDS request from proxy %q, first request: %v, version info %q, "+
 				"error details %s, connId:  %s \n ", conIDresourceNamePrefix, discReq.Node.Id, firstRequestFlag, discReq.VersionInfo,
 				discReq.ErrorDetail, conID)
+			// Remove the secret from cache, otherwise refresh job will process this item(if envoy fails to reconnect)
+			// and cause some confusing logs like 'fails to notify because connection isn't found'.
+			defer s.st.DeleteSecret(conID, resourceName)
 
 			// In ingress gateway agent mode, if the first SDS request is received but Ingress gateway secret which is
 			// provisioned as kubernetes secret is not ready, wait for secret before sending SDS response.
@@ -346,9 +349,7 @@ func (s *sdsservice) StreamSecrets(stream sds.SecretDiscoveryService_StreamSecre
 				sdsServiceLog.Infof("Skipping waiting for ingress gateway secret")
 			}
 
-			// Remove the secret from cache, otherwise refresh job will process this item(if envoy fails to reconnect)
-			// and cause some confusing logs like 'fails to notify because connection isn't found'.
-			defer s.st.DeleteSecret(conID, resourceName)
+
 
 			secret, err := s.st.GenerateSecret(ctx, conID, resourceName, token)
 			if err != nil {

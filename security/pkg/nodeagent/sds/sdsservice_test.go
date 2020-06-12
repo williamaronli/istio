@@ -554,7 +554,6 @@ func TestStreamSecretsPush(t *testing.T) {
 
 	recycleConnection(getClientConID(proxyID), testResourceName)
 	recycleConnection(getClientConID(proxyIDTwo), testResourceName)
-	clearStaledClients()
 	// Add RLock to avoid racetest fail.
 	sdsClientsMutex.RLock()
 	if len(sdsClients) != 0 {
