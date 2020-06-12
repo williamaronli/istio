@@ -444,6 +444,8 @@ func (sc *SecretCache) ShouldWaitForIngressGatewaySecret(connectionID, resourceN
 
 // DeleteSecret deletes a secret by its key from cache.
 func (sc *SecretCache) DeleteSecret(connectionID, resourceName string) {
+	cacheLog.Infof("DeleteSecretkkkkkkkkk")
+	cacheLog.Infof("%s: %s", connectionID, resourceName)
 	connKey := ConnKey{
 		ConnectionID: connectionID,
 		ResourceName: resourceName,

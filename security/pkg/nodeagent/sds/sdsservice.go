@@ -530,6 +530,7 @@ func recycleConnection(conID, resourceName string) {
 		ResourceName: resourceName,
 	}
 	sdsServiceLog.Infof("recycleConnection")
+	sdsServiceLog.Infof("conID: %s, resourceName: %s", conID, resourceName)
 	for key, element := range staledClientKeys {
 		sdsServiceLog.Infof("Key: %s =>Element:", key, element)
 	}
