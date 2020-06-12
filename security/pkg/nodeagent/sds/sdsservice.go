@@ -599,6 +599,7 @@ func addConn(k cache.ConnKey, conn *sdsConnection) {
 	defer sdsClientsMutex.Unlock()
 	conIDresourceNamePrefix := sdsLogPrefix(k.ResourceName)
 	sdsServiceLog.Infof("%s add a new connection", conIDresourceNamePrefix)
+	sdsServiceLog.Infof("%s add a new connection id", k.ConnectionID)
 	sdsServiceLog.Infof("addConn5555555")
 
 	sdsClients[k] = conn
