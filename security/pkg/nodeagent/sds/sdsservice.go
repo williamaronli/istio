@@ -326,8 +326,8 @@ func (s *sdsservice) StreamSecrets(stream sds.SecretDiscoveryService_StreamSecre
 			}
 
 			sdsServiceLog.Infof("%s received SDS request from proxy %q, first request: %v, version info %q, "+
-				"error details %s\n", conIDresourceNamePrefix, discReq.Node.Id, firstRequestFlag, discReq.VersionInfo,
-				discReq.ErrorDetail)
+				"error details %s, connId:  %s \n ", conIDresourceNamePrefix, discReq.Node.Id, firstRequestFlag, discReq.VersionInfo,
+				discReq.ErrorDetail, conID)
 
 			// In ingress gateway agent mode, if the first SDS request is received but Ingress gateway secret which is
 			// provisioned as kubernetes secret is not ready, wait for secret before sending SDS response.
