@@ -34,7 +34,7 @@ type Setup struct {
 
 func TestSDSAgentWithCacheAndConnectionCleaned(t *testing.T) {
 	//setup := StartTest(t)
-	sa := istioagent.NewSDSAgent("istiod.istio-system:15012", false, "custom", "./var/run/secrets/tokens/istio-token", "", "kubernetes")
+	sa := istioagent.NewSDSAgent("istiod.istio-system:15012", false, "custom", "/var/run/secrets/kubernetes.io/serviceaccount/token", "", "kubernetes")
 
 	_, err := sa.Start(true, "test")
 	if err != nil {
