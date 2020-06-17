@@ -13,7 +13,6 @@ import (
 	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 
 	"golang.org/x/net/context"
-	"istio.io/istio/security/pkg/nodeagent/cache"
 )
 
 const (
