@@ -57,7 +57,10 @@ type Env struct {
 	SDSServer *sds.Server
 	// CA server
 	CAServer *caserver.CAServer
+	// WorkloadSecret
+	WorkloadSecretCache *cache.SecretCache
 }
+
 
 // TearDown tears down all components.
 func (e *Env) TearDown() {
@@ -178,6 +181,7 @@ func (e *Env) StartSDSServer(t *testing.T) {
 		t.Fatalf("failed to start SDS server: %+v", err)
 	}
 	e.SDSServer = sdsServer
+	e.WorkloadSecretCache = workloadSecretCache
 }
 
 func (e *Env) cacheOptions(t *testing.T) cache.Options {
