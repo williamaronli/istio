@@ -13,8 +13,8 @@ import (
 func TestSDSAgentWithCacheAndConnectionCleaned(t *testing.T){
 	fmt.Printf("==============")
 	t.Log("TestSDSAgentWithCacheAndConnectionCleaned111111")
-	t.Skip("TestSDSAgentWithCacheAndConnectionCleaned111111")
-	t.Errorf("TestSDSAgentWithCacheAndConnectionCleaned111111")
+	//t.Skip("TestSDSAgentWithCacheAndConnectionCleaned111111")
+	//t.Errorf("TestSDSAgentWithCacheAndConnectionCleaned111111")
 	setup := StartTest(t)
 	defer setup.server.Stop()
 
