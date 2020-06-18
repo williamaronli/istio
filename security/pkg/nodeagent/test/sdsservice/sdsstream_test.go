@@ -1,18 +1,18 @@
 package sdsservice
 
 import (
+	"fmt"
 	"net"
 	"testing"
-	"fmt"
 
+	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
+	sds "github.com/envoyproxy/go-control-plane/envoy/service/secret/v3"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"istio.io/istio/pkg/istio-agent"
-	sds "github.com/envoyproxy/go-control-plane/envoy/service/secret/v3"
-	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
-	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
-	sdsTest "istio.io/istio/security/pkg/nodeagent/test"
 	"istio.io/istio/pkg/test/env"
+	sdsTest "istio.io/istio/security/pkg/nodeagent/test"
 
 	"golang.org/x/net/context"
 )

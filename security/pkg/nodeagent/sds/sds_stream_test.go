@@ -3,25 +3,11 @@ package sds
 import (
 	"fmt"
 	"testing"
+
+	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	sds "github.com/envoyproxy/go-control-plane/envoy/service/secret/v3"
 	"google.golang.org/grpc"
-	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
-	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
-)
-
-const (
-	// SecretType is used for secret discovery service to construct response.
-	SecretTypeV2 = "type.googleapis.com/envoy.api.v2.auth.Secret"
-	SecretTypeV3 = "type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.Secret"
-
-	// credentialTokenHeaderKey is the header key in gPRC header which is used to
-	// pass credential token from envoy's SDS request to SDS service.
-	credentialTokenHeaderKey = "authorization"
-
-	// K8sSAJwtTokenHeaderKey is the request header key for k8s jwt token.
-	// Binary header name must has suffix "-bin", according to https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md.
-	// Same value defined in pilot pkg(k8sSAJwtTokenHeaderKey)
-	k8sSAJwtTokenHeaderKey = "istio_sds_credentials_header-bin"
 )
 
 func TestSDSAgentWithCacheAndConnectionCleaned(t *testing.T){
