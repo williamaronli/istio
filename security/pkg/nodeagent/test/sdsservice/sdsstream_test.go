@@ -7,10 +7,12 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
-	istioagent "istio.io/istio/pkg/istio-agent"
+	"istio.io/istio/pkg/istio-agent"
 	sds "github.com/envoyproxy/go-control-plane/envoy/service/secret/v3"
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	sdsTest "istio.io/istio/security/pkg/nodeagent/test"
+	"istio.io/istio/pkg/test/env"
 
 	"golang.org/x/net/context"
 )
@@ -33,14 +35,15 @@ type Setup struct {
 }
 
 func TestSDSAgentWithCacheAndConnectionCleaned(t *testing.T) {
-	//setup := StartTest(t)
-	sa := istioagent.NewSDSAgent("istiod.istio-system:15012", false, "custom", "/var/run/secrets/kubernetes.io/serviceaccount/token", "", "kubernetes")
+	setup := sdsTest.SetupTest(t,env.SDSStreamTest)
+	sa := *istioagent.NewSDSAgent("istiod.istio-system:15012", false, "custom", "", "", "kubernetes")
 
 	_, err := sa.Start(true, "test")
 	if err != nil {
 		t.Fatalf("Unexpected error starting SDSAgent %v", err)
 	}
 	notifyChan := make(chan notifyMsg)
+
 	proxyID := "sidecar~127.0.0.1~SecretsPushStreamOne~local"
 	connOne, streamOne := createSDSStream(t, sa.SDSAddress, fakeToken1)
 	defer connOne.Close()
