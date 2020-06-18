@@ -19,7 +19,7 @@ func TestSDSAgentWithCacheAndConnectionCleaned(t *testing.T){
 	defer setup.server.Stop()
 
 	conn, stream := createSDSStream(t, setup.socket, fakeToken1)
-	defer conn.Close()
+	//defer conn.Close()
 	proxyID := "sidecar~127.0.0.1~SecretsPushStreamOne~local"
 	notifyChan := make(chan notifyMsg)
 
@@ -34,6 +34,7 @@ func TestSDSAgentWithCacheAndConnectionCleaned(t *testing.T){
 	})
 	waitForNotificationToProceed(t, notifyChan, "notify push secret 1")
 	conn.Close()
+	t.Log("22222222222")
 	setup.secretStore.secrets.Range(func(key, value interface{}) bool {
 		t.Logf("secretStore: secrets %s", key)
 		return true
