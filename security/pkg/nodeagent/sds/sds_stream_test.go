@@ -13,13 +13,14 @@ import (
 func TestSDSAgentWithCacheAndConnectionCleaned(t *testing.T){
 	setup := StartTest(t)
 	defer setup.server.Stop()
+	t.Log("TestSDSAgentWithCacheAndConnectionCleaned111111")
 
 	conn, stream := createSDSStream(t, setup.socket, fakeToken1)
 	defer conn.Close()
 	proxyID := "sidecar~127.0.0.1~SecretsPushStreamOne~local"
 	notifyChan := make(chan notifyMsg)
 
-	go testSDSStreamOne(stream, proxyID, notifyChan)
+	go testSDSStreamCache(stream, proxyID, notifyChan, conn)
 	// verify that the first SDS request sent by two streams do not hit cache.
 	waitForSecretCacheCheck(t, setup.secretStore, false, 2)
 	waitForNotificationToProceed(t, notifyChan, "notify push secret 1")
