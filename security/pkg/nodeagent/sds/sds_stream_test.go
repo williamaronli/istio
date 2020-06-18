@@ -25,9 +25,19 @@ func TestSDSAgentWithCacheAndConnectionCleaned(t *testing.T){
 
 	go testSDSStreamCache(stream, proxyID, notifyChan, conn)
 	// verify that the first SDS request sent by two streams do not hit cache.
-	waitForSecretCacheCheck(t, setup.secretStore, false, 2)
-	waitForNotificationToProceed(t, notifyChan, "notify push secret 1")
+	waitForSecretCacheCheck(t, setup.secretStore, false, 1)
 
+
+	setup.secretStore.secrets.Range(func(key, value interface{}) bool {
+		t.Logf("secretStore: secrets %s", key)
+		return true
+	})
+	waitForNotificationToProceed(t, notifyChan, "notify push secret 1")
+	conn.Close()
+	setup.secretStore.secrets.Range(func(key, value interface{}) bool {
+		t.Logf("secretStore: secrets %s", key)
+		return true
+	})
 }
 
 func testSDSStreamCache(stream sds.SecretDiscoveryService_StreamSecretsClient, proxyID string,

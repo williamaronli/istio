@@ -936,6 +936,8 @@ type mockSecretStore struct {
 	secretCacheHit  int
 	secretCacheMiss int
 	mutex           sync.RWMutex
+	deletedSecrets sync.Map
+	addedSecrets sync.Map
 }
 
 func (ms *mockSecretStore) SecretCacheHit() int {
