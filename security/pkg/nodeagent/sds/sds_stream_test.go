@@ -11,9 +11,9 @@ import (
 )
 
 func TestSDSAgentWithCacheAndConnectionCleaned(t *testing.T){
+	t.Log("TestSDSAgentWithCacheAndConnectionCleaned111111")
 	setup := StartTest(t)
 	defer setup.server.Stop()
-	t.Log("TestSDSAgentWithCacheAndConnectionCleaned111111")
 
 	conn, stream := createSDSStream(t, setup.socket, fakeToken1)
 	defer conn.Close()
