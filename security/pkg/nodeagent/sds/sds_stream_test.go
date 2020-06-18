@@ -32,13 +32,14 @@ func TestSDSAgentWithCacheAndConnectionCleaned(t *testing.T){
 		t.Logf("secretStore: secrets %s", key)
 		return true
 	})
-	waitForNotificationToProceed(t, notifyChan, "notify push secret 1")
 	conn.Close()
+	waitForNotificationToProceed(t, notifyChan, "notify push secret 1")
 	t.Log("22222222222")
 	setup.secretStore.secrets.Range(func(key, value interface{}) bool {
 		t.Logf("secretStore: secrets %s", key)
 		return true
 	})
+
 }
 
 func testSDSStreamCache(stream sds.SecretDiscoveryService_StreamSecretsClient, proxyID string,
