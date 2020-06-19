@@ -442,6 +442,10 @@ type notifyMsg struct {
 func waitForNotificationToProceed(t *testing.T, notifyChan chan notifyMsg, proceedNotice string) {
 	for {
 		if notify := <-notifyChan; notify.Err != nil {
+			t.Logf("kkkkkkkpppppp")
+			t.Logf("%v",notify)
+			t.Logf("%v",notify.Err)
+			t.Logf("%s",notify.Message)
 			t.Fatalf("get error from stream: %v", notify.Message)
 		} else {
 			if notify.Message != proceedNotice {
