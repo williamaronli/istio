@@ -65,6 +65,7 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 	waitForNotificationToProceed(t, notifyChan, "notify push secret 1")
 	t.Log("33333333")
 	conn.Close()
+	time.Sleep(time.Second * 5)
 	setup.secretStore.secrets.Range(func(key, value interface{}) bool {
 		t.Logf("secretStore: secrets %s", key)
 		return true
