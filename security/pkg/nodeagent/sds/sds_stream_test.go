@@ -31,78 +31,22 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 	defer setup.server.Stop()
 
 	conn, stream := createSDSStream(t, setup.socket, fakeToken1)
-	//defer conn.Close()
+	defer conn.Close()
 	notifyChan := make(chan notifyMsg)
-
-
-	t.Log("00000000")
-	t.Log("sssssss")
 
 	go testSDSSuccessIngressStreamCache(stream, ValidProxyID, notifyChan, conn)
 	// verify that the first SDS request sent by two streams do not hit cache.
 	waitForStreamSecretCacheCheck(t, setup.secretStore, false, 1)
-
-	t.Log("111111111")
-	t.Logf("sdsClient %v ",len(sdsClients))
-
-	for key, val := range sdsClients {
-		t.Logf("key is : %v, value is : %v", key,val)
-	}
-	//conID := getClientConID(ValidProxyID)
-	t.Log(getClientConID(ValidProxyID))
-	t.Log(getClientConID(InValidProxyID))
-	//if err := NotifyProxy(cache.ConnKey{ConnectionID: conID, ResourceName: testResourceName},
-	//	setup.generatePushSecret(conID, fakeToken1)); err != nil {
-	//	t.Fatalf("failed to send push notification to proxy %q: %v", conID, err)
-	//}
-	t.Logf("secretStore size1")
-	setup.secretStore.secrets.Range(func(key, value interface{}) bool {
-		t.Logf("secretStore: secrets %s", key)
-		return true
-	})
-	t.Log("22222222")
 	waitForStreamNotificationToProceed(t, notifyChan, "notify push secret 1")
-	t.Log("33333333")
-	conn.Close()
 	waitForSecretCacheCleanUp(t,setup.secretStore.secrets)
-	setup.secretStore.secrets.Range(func(key, value interface{}) bool {
-		t.Logf("secretStore: secrets %s", key)
-		return true
-	})
 
 	conn, stream = createSDSStream(t, setup.socket, fakeToken1)
+	defer conn.Close()
 	go testSDSInvalidIngressStreamCache(stream, InValidProxyID, notifyChan, conn)
 	// verify that the first SDS request sent by two streams do not hit cache.
 	waitForStreamSecretCacheCheck(t, setup.secretStore, false, 1)
-
-	t.Log("111111111")
-	t.Logf("sdsClient %v ",len(sdsClients))
-	for key, val := range sdsClients {
-		t.Logf("key is : %v, value is : %v", key,val)
-	}
-	//conID := getClientConID(ValidProxyID)
-	t.Log(getClientConID(ValidProxyID))
-	t.Log(getClientConID(InValidProxyID))
-	//if err := NotifyProxy(cache.ConnKey{ConnectionID: conID, ResourceName: testResourceName},
-	//	setup.generatePushSecret(conID, fakeToken1)); err != nil {
-	//	t.Fatalf("failed to send push notification to proxy %q: %v", conID, err)
-	//}
-	setup.secretStore.secrets.Range(func(key, value interface{}) bool {
-		t.Logf("secretStore: secrets %s", key)
-		return true
-	})
-	t.Log("22222222")
 	waitForStreamNotificationToProceed(t, notifyChan, "notify push secret 2")
-	t.Log("33333333")
-	conn.Close()
 	waitForSecretCacheCleanUp(t,setup.secretStore.secrets)
-	t.Logf("secretStore size2")
-	setup.secretStore.secrets.Range(func(key, value interface{}) bool {
-		t.Logf("secretStore: secrets %s", key)
-		return true
-	})
-	//go testSDSIngressStreamCache(stream, InValidProxyID, notifyChan, conn)
-
 }
 
 func waitForSecretCacheCleanUp(t *testing.T, secretMap sync.Map) {
@@ -406,6 +350,8 @@ func createStreamSDSServer(t *testing.T, socket string) (*Server, *mockIngressGa
 func waitForStreamNotificationToProceed(t *testing.T, notifyChan chan notifyMsg, proceedNotice string) {
 	for {
 		if notify := <-notifyChan; notify.Err != nil  {
+			// if the error is deliberately made to terminate the normal flow
+			// to verify the secret are deleted, we don't return an error
 			if notify.Message == BLOCK_GEN_SECRET_ERROR {
 				return
 			}
