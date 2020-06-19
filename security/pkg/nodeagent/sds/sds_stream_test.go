@@ -389,7 +389,10 @@ func createStreamSDSServer(t *testing.T, socket string) (*Server, *mockIngressGa
 
 func waitForStreamNotificationToProceed(t *testing.T, notifyChan chan notifyMsg, proceedNotice string) {
 	for {
-		if notify := <-notifyChan; notify.Err != nil && notify.Message != BLOCK_GEN_SECRET_ERROR {
+		if notify := <-notifyChan; notify.Err != nil  {
+			if notify.Message != BLOCK_GEN_SECRET_ERROR {
+				return
+			}
 			t.Fatalf("get error from stream: %v", notify.Message)
 		} else {
 			if notify.Message != proceedNotice {
