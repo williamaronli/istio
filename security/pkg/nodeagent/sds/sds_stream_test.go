@@ -97,6 +97,7 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 	t.Log("33333333")
 	conn.Close()
 	time.Sleep(time.Second * 5)
+	t.Logf("secretStore size")
 	setup.secretStore.secrets.Range(func(key, value interface{}) bool {
 		t.Logf("secretStore: secrets %s", key)
 		return true
