@@ -35,6 +35,7 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 
 	conID := getClientConID(proxyID)
 	t.Log("00000000")
+	t.Log(conID)
 	go testSDSIngressStreamCache(stream, proxyID, notifyChan, conn)
 	// verify that the first SDS request sent by two streams do not hit cache.
 	waitForStreamSecretCacheCheck(t, setup.secretStore, false, 1)
