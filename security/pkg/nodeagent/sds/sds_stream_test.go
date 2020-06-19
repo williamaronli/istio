@@ -23,6 +23,7 @@ import (
 const (
 	ValidProxyID = "sidecar~127.0.0.1~SecretsPushStreamOne~local"
 	InValidProxyID = "invalid~sidecar~127.0.0.1~SecretsPushStreamOne~local"
+	BLOCK_GEN_SECRET_ERROR= "BLOCK_GENERATE_SECRET_FOR_TEST_ERROR"
 )
 
 func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
@@ -64,7 +65,7 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 		return true
 	})
 	t.Log("22222222")
-	waitForNotificationToProceed(t, notifyChan, "notify push secret 1")
+	waitForStreamNotificationToProceed(t, notifyChan, "notify push secret 1")
 	t.Log("33333333")
 	conn.Close()
 	time.Sleep(time.Second * 5)
@@ -95,7 +96,7 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 		return true
 	})
 	t.Log("22222222")
-	waitForNotificationToProceed(t, notifyChan, "notify push secret 2")
+	waitForStreamNotificationToProceed(t, notifyChan, "notify push secret 2")
 	t.Log("33333333")
 	conn.Close()
 	time.Sleep(time.Second * 5)
@@ -182,11 +183,11 @@ func testSDSInvalidIngressStreamCache(stream sds.SecretDiscoveryService_StreamSe
 	}
 	// Send first request and verify response
 	if err := stream.Send(req); err != nil {
-		notifyChan <- notifyMsg{Err: err, Message: fmt.Sprintf("stream one: stream.Send failed: %v", err)}
+		notifyChan <- notifyMsg{Err: err, Message: fmt.Sprintf("stream: stream.Send failed: %v", err)}
 	}
 	_, err := stream.Recv()
 	if err != nil {
-		notifyChan <- notifyMsg{Err: err, Message: fmt.Sprintf("stream one: stream.Recv failed: %v", err)}
+		notifyChan <- notifyMsg{Err: err, Message: BLOCK_GEN_SECRET_ERROR}
 	}
 	notifyChan <- notifyMsg{Err: nil, Message: "notify push secret 2"}
 }
@@ -384,4 +385,18 @@ func createStreamSDSServer(t *testing.T, socket string) (*Server, *mockIngressGa
 		t.Fatalf("failed to start grpc server for sds: %v", err)
 	}
 	return server, st
+}
+
+func waitForStreamNotificationToProceed(t *testing.T, notifyChan chan notifyMsg, proceedNotice string) {
+	for {
+		if notify := <-notifyChan; notify.Err != nil && notify.Message != BLOCK_GEN_SECRET_ERROR {
+			t.Fatalf("get error from stream: %v", notify.Message)
+		} else {
+			if notify.Message != proceedNotice {
+				t.Fatalf("push signal does not match, expected %s but got %s", proceedNotice,
+					notify.Message)
+			}
+			return
+		}
+	}
 }
