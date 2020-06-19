@@ -280,7 +280,10 @@ func (s *sdsservice) StreamSecrets(stream sds.SecretDiscoveryService_StreamSecre
 			con.sdsPushTime = time.Time{}
 			con.mutex.Unlock()
 
-			defer releaseResourcePerConn(s, conID, resourceName)
+			defer recycleConnection(conID, resourceName)
+			fmt.Printf("kkkk11111")
+			fmt.Printf(conID)
+			fmt.Printf(resourceName)
 
 			conIDresourceNamePrefix := sdsLogPrefix(resourceName)
 			if s.localJWT {
@@ -321,6 +324,7 @@ func (s *sdsservice) StreamSecrets(stream sds.SecretDiscoveryService_StreamSecre
 					discReq.ErrorDetail)
 				continue
 			}
+			fmt.Printf("kkkk22222")
 
 			sdsServiceLog.Debugf("%s received SDS request from proxy %q, first request: %v, version info %q, "+
 				"error details %s\n", conIDresourceNamePrefix, discReq.Node.Id, firstRequestFlag, discReq.VersionInfo,
@@ -340,7 +344,7 @@ func (s *sdsservice) StreamSecrets(stream sds.SecretDiscoveryService_StreamSecre
 			} else {
 				sdsServiceLog.Infof("Skipping waiting for ingress gateway secret")
 			}
-
+			fmt.Printf("kkkk3333")
 			secret, err := s.st.GenerateSecret(ctx, conID, resourceName, token)
 			if err != nil {
 				sdsServiceLog.Errorf("%s Close connection. Failed to get secret for proxy %q from "+
@@ -358,6 +362,9 @@ func (s *sdsservice) StreamSecrets(stream sds.SecretDiscoveryService_StreamSecre
 
 			// Remove the secret from cache, otherwise refresh job will process this item(if envoy fails to reconnect)
 			// and cause some confusing logs like 'fails to notify because connection isn't found'.
+			fmt.Printf("pppppppjjjjjjjjjj")
+			fmt.Printf(conID)
+			fmt.Printf(resourceName)
 			defer s.st.DeleteSecret(conID, resourceName)
 
 			con.mutex.Lock()
@@ -479,6 +486,9 @@ func clearStaledClients() {
 func NotifyProxy(connKey cache.ConnKey, secret *model.SecretItem) error {
 	conIDresourceNamePrefix := sdsLogPrefix(connKey.ResourceName)
 	sdsClientsMutex.Lock()
+	fmt.Printf("sssssssssssss")
+	fmt.Printf(connKey.ConnectionID)
+	fmt.Printf(connKey.ResourceName)
 	conn := sdsClients[connKey]
 	if conn == nil {
 		sdsClientsMutex.Unlock()
