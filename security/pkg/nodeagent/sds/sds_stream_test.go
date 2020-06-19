@@ -27,10 +27,6 @@ const (
 )
 
 func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
-	fmt.Printf("==============")
-	t.Log("TestSDSAgentWithCacheAndConnectionCleaned111111")
-	//t.Skip("TestSDSAgentWithCacheAndConnectionCleaned111111")
-	//t.Errorf("TestSDSAgentWithCacheAndConnectionCleaned111111")
 	setup := StartStreamTest(t)
 	defer setup.server.Stop()
 
@@ -38,27 +34,9 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 	//defer conn.Close()
 	notifyChan := make(chan notifyMsg)
 
-
-	t.Log("00000000")
-	t.Log("sssssss")
-
 	go testSDSSuccessIngressStreamCache(stream, ValidProxyID, notifyChan, conn)
 	// verify that the first SDS request sent by two streams do not hit cache.
 	waitForStreamSecretCacheCheck(t, setup.secretStore, false, 1)
-
-	t.Log("111111111")
-	t.Logf("sdsClient %v ",len(sdsClients))
-
-	for key, val := range sdsClients {
-		t.Logf("key is : %v, value is : %v", key,val)
-	}
-	//conID := getClientConID(ValidProxyID)
-	t.Log(getClientConID(ValidProxyID))
-	t.Log(getClientConID(InValidProxyID))
-	//if err := NotifyProxy(cache.ConnKey{ConnectionID: conID, ResourceName: testResourceName},
-	//	setup.generatePushSecret(conID, fakeToken1)); err != nil {
-	//	t.Fatalf("failed to send push notification to proxy %q: %v", conID, err)
-	//}
 	t.Logf("secretStore size1")
 	setup.secretStore.secrets.Range(func(key, value interface{}) bool {
 		t.Logf("secretStore: secrets %s", key)
