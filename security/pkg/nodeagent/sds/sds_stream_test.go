@@ -20,6 +20,11 @@ import (
 	"k8s.io/apimachinery/pkg/util/uuid"
 )
 
+const (
+	ValidProxyID = "sidecar~127.0.0.1~SecretsPushStreamOne~local"
+	InValidProxyID = "invalid~sidecar~127.0.0.1~SecretsPushStreamOne~local"
+)
+
 func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 	fmt.Printf("==============")
 	t.Log("TestSDSAgentWithCacheAndConnectionCleaned111111")
@@ -35,6 +40,9 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 
 
 	t.Log("00000000")
+	t.Log("sssssss")
+	t.Log(getClientConID(ValidProxyID))
+	t.Log(getClientConID(InValidProxyID))
 	go testSDSIngressStreamCache(stream, proxyID, notifyChan, conn)
 	// verify that the first SDS request sent by two streams do not hit cache.
 	waitForStreamSecretCacheCheck(t, setup.secretStore, false, 1)
