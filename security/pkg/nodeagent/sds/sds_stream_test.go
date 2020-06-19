@@ -31,7 +31,6 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 	defer setup.server.Stop()
 
 	conn, stream := createSDSStream(t, setup.socket, fakeToken1)
-	//defer conn.Close()
 	notifyChan := make(chan notifyMsg)
 
 	go testSDSSuccessIngressStreamCache(stream, ValidProxyID, notifyChan, conn)
@@ -39,14 +38,15 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 	waitForStreamSecretCacheCheck(t, setup.secretStore, false, 1)
 	waitForStreamNotificationToProceed(t, notifyChan, "notify push secret 1")
 	conn.Close()
+	// verify the cache is cleaned when connection is closed
 	waitForSecretCacheCleanUp(t,setup.secretStore.secrets)
 
 	conn, stream = createSDSStream(t, setup.socket, fakeToken1)
 	go testSDSInvalidIngressStreamCache(stream, InValidProxyID, notifyChan, conn)
-	// verify that the first SDS request sent by two streams do not hit cache.
 	waitForStreamSecretCacheCheck(t, setup.secretStore, false, 1)
 	waitForStreamNotificationToProceed(t, notifyChan, "notify push secret 2")
 	conn.Close()
+	// verify the cache is cleaned when connection is closed
 	waitForSecretCacheCleanUp(t,setup.secretStore.secrets)
 }
 
@@ -179,18 +179,6 @@ func (s *StreamSetup) waitForSDSReady() error {
 	return fmt.Errorf("cannot connect SDS server, connErr: %v, streamErr: %v", conErr, streamErr)
 }
 
-func (s *StreamSetup) generatePushSecret(conID, token string) *model.SecretItem {
-	pushSecret := &model.SecretItem{
-		CertificateChain: fakePushCertificateChain,
-		PrivateKey:       fakePushPrivateKey,
-		ResourceName:     testResourceName,
-		Version:          time.Now().Format("01-02 15:04:05.000"),
-		Token:            token,
-	}
-	s.secretStore.secrets.Store(cache.ConnKey{ConnectionID: conID, ResourceName: testResourceName}, pushSecret)
-	return pushSecret
-}
-
 type mockIngressGatewaySecretStore struct {
 	checkToken      bool
 	secrets         sync.Map
@@ -230,6 +218,11 @@ func (ms *mockIngressGatewaySecretStore) GenerateSecret(ctx context.Context, con
 		}
 		fmt.Println("Store secret for key: ", key, ". token: ", token)
 		ms.secrets.Store(key, s)
+		// if it is the invalid connection for test,
+		// we still store the secret to the cache, however we will throw an error here
+		// to earlier terminate the flow and then test whether the secret will be deleted
+		// after connection is stopped
+
 		if strings.Contains(conID,"invalid") {
 			return s, fmt.Errorf("invalid connection for test")
 		}
