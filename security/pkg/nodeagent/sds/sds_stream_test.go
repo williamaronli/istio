@@ -41,7 +41,7 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 	t.Log("00000000")
 	t.Log("sssssss")
 
-	go testSDSIngressStreamCache(stream, ValidProxyID, notifyChan, conn)
+	go testSDSSuccessIngressStreamCache(stream, ValidProxyID, notifyChan, conn)
 	// verify that the first SDS request sent by two streams do not hit cache.
 	waitForStreamSecretCacheCheck(t, setup.secretStore, false, 1)
 
@@ -72,7 +72,7 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 	})
 
 	conn, stream = createSDSStream(t, setup.socket, fakeToken1)
-	go testSDSIngressStreamCache(stream, InValidProxyID, notifyChan, conn)
+	go testSDSSuccessIngressStreamCache(stream, InValidProxyID, notifyChan, conn)
 	// verify that the first SDS request sent by two streams do not hit cache.
 	waitForStreamSecretCacheCheck(t, setup.secretStore, false, 1)
 
@@ -93,7 +93,7 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 		return true
 	})
 	t.Log("22222222")
-	waitForNotificationToProceed(t, notifyChan, "notify push secret 1")
+	waitForNotificationToProceed(t, notifyChan, "notify push secret 2")
 	t.Log("33333333")
 	conn.Close()
 	time.Sleep(time.Second * 5)
@@ -138,7 +138,7 @@ func waitForStreamSecretCacheCheck(t *testing.T, mss *mockIngressGatewaySecretSt
 	}
 }
 
-func testSDSIngressStreamCache(stream sds.SecretDiscoveryService_StreamSecretsClient, proxyID string,
+func testSDSSuccessIngressStreamCache(stream sds.SecretDiscoveryService_StreamSecretsClient, proxyID string,
 		notifyChan chan notifyMsg, conn *grpc.ClientConn) {
 		req := &discovery.DiscoveryRequest{
 			TypeUrl:       SecretTypeV3,
@@ -164,6 +164,25 @@ func testSDSIngressStreamCache(stream sds.SecretDiscoveryService_StreamSecretsCl
 			"stream one: first SDS response verification failed: %v", err)}
 	}
 	notifyChan <- notifyMsg{Err: nil, Message: "notify push secret 1"}
+}
+
+func testSDSInvalidIngressStreamCache(stream sds.SecretDiscoveryService_StreamSecretsClient, proxyID string,
+		notifyChan chan notifyMsg, conn *grpc.ClientConn) {
+	req := &discovery.DiscoveryRequest{
+		TypeUrl:       SecretTypeV3,
+		ResourceNames: []string{testResourceName},
+		Node: &core.Node{
+			Id: proxyID,
+		},
+		// Set a non-empty version info so that StreamSecrets() starts a cache check, and cache miss
+		// metric is updated accordingly.
+		VersionInfo: "initial_version",
+	}
+	// Send first request and verify response
+	if err := stream.Send(req); err != nil {
+		notifyChan <- notifyMsg{Err: err, Message: fmt.Sprintf("stream one: stream.Send failed: %v", err)}
+	}
+	notifyChan <- notifyMsg{Err: nil, Message: "notify push secret 2"}
 }
 
 type StreamSetup struct {
