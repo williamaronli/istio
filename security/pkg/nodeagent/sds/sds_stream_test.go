@@ -41,17 +41,19 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 
 	t.Log("00000000")
 	t.Log("sssssss")
-	t.Log(getClientConID(ValidProxyID))
-	t.Log(getClientConID(InValidProxyID))
+
 	go testSDSIngressStreamCache(stream, proxyID, notifyChan, conn)
 	// verify that the first SDS request sent by two streams do not hit cache.
 	waitForStreamSecretCacheCheck(t, setup.secretStore, false, 1)
+
 	t.Log("111111111")
 	t.Logf("sdsClient %v ",len(sdsClients))
 	for key, val := range sdsClients {
 		t.Logf("key is : %v, value is : %v", key,val)
 	}
 	conID := getClientConID(proxyID)
+	t.Log(getClientConID(ValidProxyID))
+	t.Log(getClientConID(InValidProxyID))
 	if err := NotifyProxy(cache.ConnKey{ConnectionID: conID, ResourceName: testResourceName},
 		setup.generatePushSecret(conID, fakeToken1)); err != nil {
 		t.Fatalf("failed to send push notification to proxy %q: %v", conID, err)
