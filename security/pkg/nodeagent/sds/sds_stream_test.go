@@ -268,6 +268,7 @@ func (ms *mockIngressGatewaySecretStore) DeleteSecret(conID, resourceName string
 		ConnectionID: conID,
 		ResourceName: resourceName,
 	}
+	fmt.Printf("mockIngressGatewaySecretStore,conId: %s, resourceName: %s", conID, resourceName)
 	ms.secrets.Delete(key)
 }
 

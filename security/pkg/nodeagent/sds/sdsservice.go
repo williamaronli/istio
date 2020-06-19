@@ -362,7 +362,8 @@ func (s *sdsservice) StreamSecrets(stream sds.SecretDiscoveryService_StreamSecre
 			// Remove the secret from cache, otherwise refresh job will process this item(if envoy fails to reconnect)
 			// and cause some confusing logs like 'fails to notify because connection isn't found'.
 			fmt.Printf("pppppppjjjjjjjjjj")
-			fmt.Printf(conID,resourceName)
+			fmt.Printf(conID)
+			fmt.Printf(resourceName)
 			defer s.st.DeleteSecret(conID, resourceName)
 
 			con.mutex.Lock()
