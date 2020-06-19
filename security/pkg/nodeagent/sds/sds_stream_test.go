@@ -35,7 +35,7 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 
 	conn, stream := createSDSStream(t, setup.socket, fakeToken1)
 	//defer conn.Close()
-	proxyID := "sidecar~127.0.0.1~SecretsPushStreamOne~local"
+	proxyID := "invalid~sidecar~127.0.0.1~SecretsPushStreamOne~local"
 	notifyChan := make(chan notifyMsg)
 
 
