@@ -479,6 +479,9 @@ func clearStaledClients() {
 func NotifyProxy(connKey cache.ConnKey, secret *model.SecretItem) error {
 	conIDresourceNamePrefix := sdsLogPrefix(connKey.ResourceName)
 	sdsClientsMutex.Lock()
+	fmt.Printf("sssssssssssss")
+	fmt.Printf(connKey.ConnectionID)
+	fmt.Printf(connKey.ResourceName)
 	conn := sdsClients[connKey]
 	if conn == nil {
 		sdsClientsMutex.Unlock()

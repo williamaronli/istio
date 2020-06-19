@@ -107,14 +107,14 @@ func testSDSIngressStreamCache(stream sds.SecretDiscoveryService_StreamSecretsCl
 		notifyChan <- notifyMsg{Err: err, Message: fmt.Sprintf("stream one: stream.Send failed: %v", err)}
 	}
 	notifyChan <- notifyMsg{Err: nil, Message: "notify push secret 1"}
-	//resp, err := stream.Recv()
-	//if err != nil {
-	//	notifyChan <- notifyMsg{Err: err, Message: fmt.Sprintf("stream one: stream.Recv failed: %v", err)}
-	//}
-	//if err := verifySDSSResponse(resp, fakePrivateKey, fakeCertificateChain); err != nil {
-	//	notifyChan <- notifyMsg{Err: err, Message: fmt.Sprintf(
-	//		"stream one: first SDS response verification failed: %v", err)}
-	//}
+	resp, err := stream.Recv()
+	if err != nil {
+		notifyChan <- notifyMsg{Err: err, Message: fmt.Sprintf("stream one: stream.Recv failed: %v", err)}
+	}
+	if err := verifySDSSResponse(resp, fakePrivateKey, fakeCertificateChain); err != nil {
+		notifyChan <- notifyMsg{Err: err, Message: fmt.Sprintf(
+			"stream one: first SDS response verification failed: %v", err)}
+	}
 }
 
 type StreamSetup struct {
