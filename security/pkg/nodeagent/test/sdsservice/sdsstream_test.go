@@ -114,6 +114,7 @@ func setupConnection(socket string) (*grpc.ClientConn, error) {
 func waitForNotificationToProceed(t *testing.T, notifyChan chan notifyMsg, proceedNotice string) {
 	for {
 		if notify := <-notifyChan; notify.Err != nil {
+			t.Logf("kkkkkkkpppppp")
 			t.Logf("%v",notify)
 			t.Logf("%v",notify.Err)
 			t.Logf("%s",notify.Message)
