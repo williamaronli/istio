@@ -68,7 +68,7 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 	waitForStreamNotificationToProceed(t, notifyChan, "notify push secret 1")
 	t.Log("33333333")
 	conn.Close()
-	time.Sleep(time.Second * 5)
+	waitForSecretCacheCleanUp(t,setup.secretStore.secrets)
 	setup.secretStore.secrets.Range(func(key, value interface{}) bool {
 		t.Logf("secretStore: secrets %s", key)
 		return true
@@ -99,7 +99,7 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 	waitForStreamNotificationToProceed(t, notifyChan, "notify push secret 2")
 	t.Log("33333333")
 	conn.Close()
-	time.Sleep(time.Second * 5)
+	waitForSecretCacheCleanUp(t,setup.secretStore.secrets)
 	t.Logf("secretStore size2")
 	setup.secretStore.secrets.Range(func(key, value interface{}) bool {
 		t.Logf("secretStore: secrets %s", key)
@@ -107,6 +107,26 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 	})
 	//go testSDSIngressStreamCache(stream, InValidProxyID, notifyChan, conn)
 
+}
+
+func waitForSecretCacheCleanUp(t *testing.T, secretMap sync.Map) {
+	waitTimeout := 8 * time.Second
+	start := time.Now()
+	for {
+		cacheCleaned := false
+		secretMap.Range(func(key, value interface{}) bool {
+			cacheCleaned = true
+			return false
+		})
+		if !cacheCleaned {
+			return
+		}
+		if time.Since(start) > waitTimeout && cacheCleaned{
+			t.Fatalf("cacheCleaned is not cleaned")
+			return
+		}
+		time.Sleep(1 * time.Second)
+	}
 }
 
 // waitForSecretCacheCheck wait until cache hit or cache miss meets expected value and return. Or
