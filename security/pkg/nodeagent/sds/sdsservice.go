@@ -281,7 +281,7 @@ func (s *sdsservice) StreamSecrets(stream sds.SecretDiscoveryService_StreamSecre
 			con.mutex.Unlock()
 
 			defer recycleConnection(conID, resourceName)
-			fmt.Printf("kkkkhhhhhhhhhh")
+			fmt.Printf("kkkk11111")
 			fmt.Printf(conID)
 			fmt.Printf(resourceName)
 
@@ -324,6 +324,7 @@ func (s *sdsservice) StreamSecrets(stream sds.SecretDiscoveryService_StreamSecre
 					discReq.ErrorDetail)
 				continue
 			}
+			fmt.Printf("kkkk22222")
 
 			sdsServiceLog.Debugf("%s received SDS request from proxy %q, first request: %v, version info %q, "+
 				"error details %s\n", conIDresourceNamePrefix, discReq.Node.Id, firstRequestFlag, discReq.VersionInfo,
@@ -343,7 +344,7 @@ func (s *sdsservice) StreamSecrets(stream sds.SecretDiscoveryService_StreamSecre
 			} else {
 				sdsServiceLog.Infof("Skipping waiting for ingress gateway secret")
 			}
-
+			fmt.Printf("kkkk3333")
 			secret, err := s.st.GenerateSecret(ctx, conID, resourceName, token)
 			if err != nil {
 				sdsServiceLog.Errorf("%s Close connection. Failed to get secret for proxy %q from "+
