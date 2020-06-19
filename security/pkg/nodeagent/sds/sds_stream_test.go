@@ -35,7 +35,6 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 
 	conn, stream := createSDSStream(t, setup.socket, fakeToken1)
 	//defer conn.Close()
-	proxyID := "invalid~sidecar~127.0.0.1~SecretsPushStreamOne~local"
 	notifyChan := make(chan notifyMsg)
 
 
@@ -51,7 +50,7 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 	for key, val := range sdsClients {
 		t.Logf("key is : %v, value is : %v", key,val)
 	}
-	conID := getClientConID(proxyID)
+	conID := getClientConID(ValidProxyID)
 	t.Log(getClientConID(ValidProxyID))
 	t.Log(getClientConID(InValidProxyID))
 	if err := NotifyProxy(cache.ConnKey{ConnectionID: conID, ResourceName: testResourceName},
