@@ -41,10 +41,11 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 		t.Logf("secretStore: secrets %s", key)
 		return true
 	})
-	//conn.Close()
-	stream.CloseSend()
+
 	waitForNotificationToProceed(t, notifyChan, "notify push secret 1")
 	t.Log("22222222222")
+	conn.Close()
+	stream.CloseSend()
 	setup.secretStore.secrets.Range(func(key, value interface{}) bool {
 		t.Logf("secretStore: secrets %s", key)
 		return true
