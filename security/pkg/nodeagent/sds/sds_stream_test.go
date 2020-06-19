@@ -242,6 +242,9 @@ func (ms *mockIngressGatewaySecretStore) GenerateSecret(ctx context.Context, con
 		}
 		fmt.Println("Store secret for key: ", key, ". token: ", token)
 		ms.secrets.Store(key, s)
+		if strings.Contains(conID,"invalid") {
+			return s, fmt.Errorf("invalid connection for test")
+		}
 		return s, nil
 	}
 
@@ -254,6 +257,9 @@ func (ms *mockIngressGatewaySecretStore) GenerateSecret(ctx context.Context, con
 		}
 		fmt.Println("Store root cert for key: ", key, ". token: ", token)
 		ms.secrets.Store(key, s)
+		if strings.Contains(conID,"invalid") {
+			return s, fmt.Errorf("invalid connection for test")
+		}
 		return s, nil
 	}
 
@@ -305,9 +311,6 @@ func (ms *mockIngressGatewaySecretStore) DeleteSecret(conID, resourceName string
 }
 
 func (ms *mockIngressGatewaySecretStore) ShouldWaitForIngressGatewaySecret(connectionID, resourceName, token string, fileMountedCertsOnly bool) bool {
-	if strings.Contains(connectionID,"invalid") {
-		return true
-	}
 	return false
 }
 
