@@ -280,7 +280,7 @@ func (s *sdsservice) StreamSecrets(stream sds.SecretDiscoveryService_StreamSecre
 			con.sdsPushTime = time.Time{}
 			con.mutex.Unlock()
 
-			defer recycleConnection(conID, resourceName)
+			defer releaseResourcePerConn(s, conID, resourceName)
 
 			conIDresourceNamePrefix := sdsLogPrefix(resourceName)
 			if s.localJWT {
