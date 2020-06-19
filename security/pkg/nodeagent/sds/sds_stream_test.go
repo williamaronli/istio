@@ -33,10 +33,14 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 	proxyID := "sidecar~127.0.0.1~SecretsPushStreamOne~local"
 	notifyChan := make(chan notifyMsg)
 
+	conID := getClientConID(proxyID)
 	go testSDSIngressStreamCache(stream, proxyID, notifyChan, conn)
 	// verify that the first SDS request sent by two streams do not hit cache.
 	waitForStreamSecretCacheCheck(t, setup.secretStore, false, 1)
-
+	if err := NotifyProxy(cache.ConnKey{ConnectionID: conID, ResourceName: testResourceName},
+		setup.generatePushSecret(conID, fakeToken1)); err != nil {
+		t.Fatalf("failed to send push notification to proxy %q: %v", conID, err)
+	}
 	setup.secretStore.secrets.Range(func(key, value interface{}) bool {
 		t.Logf("secretStore: secrets %s", key)
 		return true
@@ -101,14 +105,14 @@ func testSDSIngressStreamCache(stream sds.SecretDiscoveryService_StreamSecretsCl
 		notifyChan <- notifyMsg{Err: err, Message: fmt.Sprintf("stream one: stream.Send failed: %v", err)}
 	}
 	notifyChan <- notifyMsg{Err: nil, Message: "notify push secret 1"}
-	resp, err := stream.Recv()
-	if err != nil {
-		notifyChan <- notifyMsg{Err: err, Message: fmt.Sprintf("stream one: stream.Recv failed: %v", err)}
-	}
-	if err := verifySDSSResponse(resp, fakePrivateKey, fakeCertificateChain); err != nil {
-		notifyChan <- notifyMsg{Err: err, Message: fmt.Sprintf(
-			"stream one: first SDS response verification failed: %v", err)}
-	}
+	//resp, err := stream.Recv()
+	//if err != nil {
+	//	notifyChan <- notifyMsg{Err: err, Message: fmt.Sprintf("stream one: stream.Recv failed: %v", err)}
+	//}
+	//if err := verifySDSSResponse(resp, fakePrivateKey, fakeCertificateChain); err != nil {
+	//	notifyChan <- notifyMsg{Err: err, Message: fmt.Sprintf(
+	//		"stream one: first SDS response verification failed: %v", err)}
+	//}
 }
 
 type StreamSetup struct {
@@ -135,6 +139,18 @@ func (s *StreamSetup) waitForSDSReady() error {
 		time.Sleep(10 * time.Millisecond)
 	}
 	return fmt.Errorf("cannot connect SDS server, connErr: %v, streamErr: %v", conErr, streamErr)
+}
+
+func (s *StreamSetup) generatePushSecret(conID, token string) *model.SecretItem {
+	pushSecret := &model.SecretItem{
+		CertificateChain: fakePushCertificateChain,
+		PrivateKey:       fakePushPrivateKey,
+		ResourceName:     testResourceName,
+		Version:          time.Now().Format("01-02 15:04:05.000"),
+		Token:            token,
+	}
+	s.secretStore.secrets.Store(cache.ConnKey{ConnectionID: conID, ResourceName: testResourceName}, pushSecret)
+	return pushSecret
 }
 
 type mockIngressGatewaySecretStore struct {
