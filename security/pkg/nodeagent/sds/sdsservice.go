@@ -281,6 +281,9 @@ func (s *sdsservice) StreamSecrets(stream sds.SecretDiscoveryService_StreamSecre
 			con.mutex.Unlock()
 
 			defer releaseResourcePerConn(s, conID, resourceName)
+			fmt.Printf("kkkkhhhhhhhhhh")
+			fmt.Printf(conID)
+			fmt.Printf(resourceName)
 
 			conIDresourceNamePrefix := sdsLogPrefix(resourceName)
 			if s.localJWT {
