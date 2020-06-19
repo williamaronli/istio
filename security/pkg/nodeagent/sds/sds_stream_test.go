@@ -43,11 +43,11 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 	for key, val := range sdsClients {
 		t.Logf("key is : %v, value is : %v", key,val)
 	}
-	//conID := getClientConID(proxyID)
-	//if err := NotifyProxy(cache.ConnKey{ConnectionID: conID, ResourceName: testResourceName},
-	//	setup.generatePushSecret(conID, fakeToken1)); err != nil {
-	//	t.Fatalf("failed to send push notification to proxy %q: %v", conID, err)
-	//}
+	conID := getClientConID(proxyID)
+	if err := NotifyProxy(cache.ConnKey{ConnectionID: conID, ResourceName: testResourceName},
+		setup.generatePushSecret(conID, fakeToken1)); err != nil {
+		t.Fatalf("failed to send push notification to proxy %q: %v", conID, err)
+	}
 	setup.secretStore.secrets.Range(func(key, value interface{}) bool {
 		t.Logf("secretStore: secrets %s", key)
 		return true
