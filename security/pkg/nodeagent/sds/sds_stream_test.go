@@ -42,7 +42,7 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 	t.Log("00000000")
 	t.Log("sssssss")
 
-	go testSDSIngressStreamCache(stream, proxyID, notifyChan, conn)
+	go testSDSIngressStreamCache(stream, ValidProxyID, notifyChan, conn)
 	// verify that the first SDS request sent by two streams do not hit cache.
 	waitForStreamSecretCacheCheck(t, setup.secretStore, false, 1)
 
@@ -121,7 +121,7 @@ func testSDSIngressStreamCache(stream sds.SecretDiscoveryService_StreamSecretsCl
 	if err := stream.Send(req); err != nil {
 		notifyChan <- notifyMsg{Err: err, Message: fmt.Sprintf("stream one: stream.Send failed: %v", err)}
 	}
-	notifyChan <- notifyMsg{Err: nil, Message: "notify push secret 1"}
+
 	resp, err := stream.Recv()
 	if err != nil {
 		notifyChan <- notifyMsg{Err: err, Message: fmt.Sprintf("stream one: stream.Recv failed: %v", err)}
@@ -130,7 +130,7 @@ func testSDSIngressStreamCache(stream sds.SecretDiscoveryService_StreamSecretsCl
 		notifyChan <- notifyMsg{Err: err, Message: fmt.Sprintf(
 			"stream one: first SDS response verification failed: %v", err)}
 	}
-
+	notifyChan <- notifyMsg{Err: nil, Message: "notify push secret 1"}
 }
 
 type StreamSetup struct {
@@ -272,7 +272,10 @@ func (ms *mockIngressGatewaySecretStore) DeleteSecret(conID, resourceName string
 }
 
 func (ms *mockIngressGatewaySecretStore) ShouldWaitForIngressGatewaySecret(connectionID, resourceName, token string, fileMountedCertsOnly bool) bool {
-	return true
+	if strings.Contains(connectionID,"invalid") {
+		return true
+	}
+	return false
 }
 
 // StartTest starts SDS server and checks SDS connectivity.
