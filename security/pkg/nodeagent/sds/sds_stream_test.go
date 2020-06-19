@@ -47,6 +47,7 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 
 	t.Log("111111111")
 	t.Logf("sdsClient %v ",len(sdsClients))
+
 	for key, val := range sdsClients {
 		t.Logf("key is : %v, value is : %v", key,val)
 	}
@@ -57,6 +58,7 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 	//	setup.generatePushSecret(conID, fakeToken1)); err != nil {
 	//	t.Fatalf("failed to send push notification to proxy %q: %v", conID, err)
 	//}
+	t.Logf("secretStore size1")
 	setup.secretStore.secrets.Range(func(key, value interface{}) bool {
 		t.Logf("secretStore: secrets %s", key)
 		return true
@@ -97,7 +99,7 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 	t.Log("33333333")
 	conn.Close()
 	time.Sleep(time.Second * 5)
-	t.Logf("secretStore size")
+	t.Logf("secretStore size2")
 	setup.secretStore.secrets.Range(func(key, value interface{}) bool {
 		t.Logf("secretStore: secrets %s", key)
 		return true
@@ -181,6 +183,10 @@ func testSDSInvalidIngressStreamCache(stream sds.SecretDiscoveryService_StreamSe
 	// Send first request and verify response
 	if err := stream.Send(req); err != nil {
 		notifyChan <- notifyMsg{Err: err, Message: fmt.Sprintf("stream one: stream.Send failed: %v", err)}
+	}
+	_, err := stream.Recv()
+	if err != nil {
+		notifyChan <- notifyMsg{Err: err, Message: fmt.Sprintf("stream one: stream.Recv failed: %v", err)}
 	}
 	notifyChan <- notifyMsg{Err: nil, Message: "notify push secret 2"}
 }
