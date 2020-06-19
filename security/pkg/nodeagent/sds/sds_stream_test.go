@@ -64,12 +64,12 @@ func TestSDSAgentStreamWithCacheAndConnectionCleaned(t *testing.T){
 	t.Log("22222222")
 	waitForNotificationToProceed(t, notifyChan, "notify push secret 1")
 	t.Log("33333333")
-	conn.Close()
-	stream.CloseSend()
 	setup.secretStore.secrets.Range(func(key, value interface{}) bool {
 		t.Logf("secretStore: secrets %s", key)
 		return true
 	})
+	go testSDSIngressStreamCache(stream, InValidProxyID, notifyChan, conn)
+	conn.Close()
 }
 
 // waitForSecretCacheCheck wait until cache hit or cache miss meets expected value and return. Or
