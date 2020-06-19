@@ -122,7 +122,7 @@ func waitForSecretCacheCleanUp(t *testing.T, secretMap sync.Map) {
 			return
 		}
 		if time.Since(start) > waitTimeout && cacheCleaned{
-			t.Fatalf("cacheCleaned is not cleaned")
+			t.Fatalf("cache is not cleaned")
 			return
 		}
 		time.Sleep(1 * time.Second)

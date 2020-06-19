@@ -280,7 +280,7 @@ func (s *sdsservice) StreamSecrets(stream sds.SecretDiscoveryService_StreamSecre
 			con.sdsPushTime = time.Time{}
 			con.mutex.Unlock()
 
-			defer recycleConnection(conID, resourceName)
+			defer releaseResourcePerConn(s, conID, resourceName)
 			fmt.Printf("kkkk11111")
 			fmt.Printf(conID)
 			fmt.Printf(resourceName)
