@@ -1033,7 +1033,7 @@ func (ms *mockSecretStore) DeleteSecret(conID, resourceName string) {
 }
 
 func (ms *mockSecretStore) ShouldWaitForIngressGatewaySecret(connectionID, resourceName, token string, fileMountedCertsOnly bool) bool {
-	return true
+	return false
 }
 
 func TestDebugEndpoints(t *testing.T) {
