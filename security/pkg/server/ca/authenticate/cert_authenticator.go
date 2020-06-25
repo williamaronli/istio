@@ -68,7 +68,9 @@ func (cca *ClientCertAuthenticator) Authenticate(ctx context.Context) (*Caller, 
 	}
 
 	tlsInfo := peer.AuthInfo.(credentials.TLSInfo)
+	fmt.Printf("%+v\n", tlsInfo)
 	chains := tlsInfo.State.VerifiedChains
+	fmt.Printf("%+v\n", chains)
 	if len(chains) == 0 || len(chains[0]) == 0 {
 		return nil, fmt.Errorf("no verified chain is found")
 	}
