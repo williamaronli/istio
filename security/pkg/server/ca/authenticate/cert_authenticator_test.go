@@ -111,6 +111,7 @@ func TestAuthenticate_clientCertAuthenticator(t *testing.T) {
 		t.Logf("%v", result)
 		if result != nil {
 			t.Logf("%v", strings.Join(result.Identities, ", "))
+			t.Logf("%v", len(result.Identities))
 		}
 		t.Logf("%v", result)
 		t.Logf("%v", tc.caller)
