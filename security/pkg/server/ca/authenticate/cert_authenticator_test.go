@@ -19,6 +19,7 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"reflect"
+	"strings"
 	"testing"
 
 	"golang.org/x/net/context"
@@ -109,7 +110,7 @@ func TestAuthenticate_clientCertAuthenticator(t *testing.T) {
 		result, err := auth.Authenticate(ctx)
 		t.Logf("%v", result)
 		if result != nil {
-			t.Logf("%v", result.Identities)
+			t.Logf("%v", strings.Join(result.Identities, ", "))
 		}
 		t.Logf("%v", tc.caller)
 		t.Logf("%v", id)
