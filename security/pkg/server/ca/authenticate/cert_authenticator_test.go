@@ -18,7 +18,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
-	"fmt"
 	"reflect"
 	"testing"
 
@@ -106,8 +105,9 @@ func TestAuthenticate_clientCertAuthenticator(t *testing.T) {
 		if tc.fakeAuthInfo != nil {
 			ctx = peer.NewContext(ctx, &peer.Peer{AuthInfo: tc.fakeAuthInfo})
 		}
-		fmt.Printf("sssss=========")
+		t.Logf("sssss=========")
 		result, err := auth.Authenticate(ctx)
+		t.Logf("%v", result)
 		if len(tc.authenticateErrMsg) > 0 {
 			if err == nil {
 				t.Errorf("Case %s: Succeeded. Error expected: %v", id, err)
