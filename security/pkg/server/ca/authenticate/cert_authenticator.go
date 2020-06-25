@@ -58,6 +58,7 @@ func (cca *ClientCertAuthenticator) Authenticate(ctx context.Context) (*Caller, 
 	fmt.Printf("sssssskkkkklllll")
 	fmt.Printf("%+v\n", peer)
 	fmt.Printf("%+v\n", ctx)
+	//fmt.Printf("%+v\n", ctx.Value(struct{})
 	if !ok || peer.AuthInfo == nil {
 		return nil, fmt.Errorf("no client certificate is presented")
 	}
@@ -77,6 +78,7 @@ func (cca *ClientCertAuthenticator) Authenticate(ctx context.Context) (*Caller, 
 		return nil, err
 	}
 
+	fmt.Printf("ccccccccccccccclllllllssssssss")
 	return &Caller{
 		AuthSource: AuthSourceClientCertificate,
 		Identities: ids,
