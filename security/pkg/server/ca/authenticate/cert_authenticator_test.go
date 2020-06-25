@@ -112,6 +112,7 @@ func TestAuthenticate_clientCertAuthenticator(t *testing.T) {
 		if result != nil {
 			t.Logf("%v", strings.Join(result.Identities, ", "))
 		}
+		t.Logf("%v", result)
 		t.Logf("%v", tc.caller)
 		t.Logf("%v", id)
 		if len(tc.authenticateErrMsg) > 0 {
