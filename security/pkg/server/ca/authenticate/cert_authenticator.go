@@ -71,6 +71,7 @@ func (cca *ClientCertAuthenticator) Authenticate(ctx context.Context) (*Caller, 
 	fmt.Printf("%+v\n", tlsInfo)
 	chains := tlsInfo.State.VerifiedChains
 	fmt.Printf("%+v\n", chains)
+	fmt.Printf("%+v\n", chains[0])
 	if len(chains) == 0 || len(chains[0]) == 0 {
 		return nil, fmt.Errorf("no verified chain is found")
 	}
