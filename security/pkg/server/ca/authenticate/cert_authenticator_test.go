@@ -108,6 +108,7 @@ func TestAuthenticate_clientCertAuthenticator(t *testing.T) {
 		t.Logf("sssss=========")
 		result, err := auth.Authenticate(ctx)
 		t.Logf("%v", result)
+		t.Logf("%v", tc.caller)
 		if len(tc.authenticateErrMsg) > 0 {
 			if err == nil {
 				t.Errorf("Case %s: Succeeded. Error expected: %v", id, err)
