@@ -172,10 +172,11 @@ func TestCreateCertificateWithoutToken(t *testing.T) {
 
 		if code != c.code {
 			t.Errorf("Case %s: expecting code to be (%d) but got (%d): %s", id, c.code, code, s.Message())
-		}
-		if len(response.CertChain) != len(c.certChain) {
-			t.Errorf("Case %s: expecting cert chain length to be (%d) but got (%d)",
-				id, len(c.certChain), len(response.CertChain))
+		} else if c.code == codes.OK {
+			if len(response.CertChain) != len(c.certChain) {
+				t.Errorf("Case %s: expecting cert chain length to be (%d) but got (%d)",
+					id, len(c.certChain), len(response.CertChain))
+			}
 		}
 		//for i, v := range response.CertChain {
 		//	if v != certChain[i] {
