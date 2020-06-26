@@ -93,7 +93,7 @@ func TestCreateCertificateWithoutToken(t *testing.T) {
 		t.Error(err)
 	}
 	auth := &authenticate.ClientCertAuthenticator{}
-	//certChain := []string{"cert", "cert_chain", "root_cert"}
+
 	server := &Server{
 		ca:             &mockca.FakeCA{
 			SignedCert: []byte("cert"),
@@ -107,7 +107,7 @@ func TestCreateCertificateWithoutToken(t *testing.T) {
 		Authenticators: []authenticate.Authenticator{auth},
 		monitoring:     newMonitoringMetrics(),
 	}
-
+	mockCertChain := []string{"cert", "cert_chain", "root_cert"}
 	testCerts := map[string]struct {
 		certChain          [][]*x509.Certificate
 		caller             *authenticate.Caller
@@ -173,9 +173,9 @@ func TestCreateCertificateWithoutToken(t *testing.T) {
 		if code != c.code {
 			t.Errorf("Case %s: expecting code to be (%d) but got (%d): %s", id, c.code, code, s.Message())
 		} else if c.code == codes.OK {
-			if len(response.CertChain) != len(c.certChain) {
+			if len(response.CertChain) != len(mockCertChain) {
 				t.Errorf("Case %s: expecting cert chain length to be (%d) but got (%d)",
-					id, len(c.certChain), len(response.CertChain))
+					id, len(mockCertChain), len(response.CertChain))
 			}
 		}
 		//for i, v := range response.CertChain {
