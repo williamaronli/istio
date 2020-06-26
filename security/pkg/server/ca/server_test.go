@@ -159,13 +159,14 @@ func TestCreateCertificateWithoutToken(t *testing.T) {
 		}
 		_, err := server.CreateCertificate(ctx, request)
 		t.Logf("oooooooooooooo")
+		t.Logf("%v",id)
 
 		s, _ := status.FromError(err)
 		t.Logf("%v",s)
 		code := s.Code()
 		t.Logf("codecodecode")
 		t.Logf("%v",code)
-		t.Logf("%v",c.authenticateErrMsg)
+
 		if code != c.code {
 			t.Errorf("Case %s: expecting code to be (%d) but got (%d): %s", id, c.code, code, s.Message())
 		}
