@@ -112,11 +112,13 @@ func TestCreateCertificateWithoutToken(t *testing.T) {
 		caller             *authenticate.Caller
 		authenticateErrMsg string
 		fakeAuthInfo       *mockAuthInfo
+		code 							 codes.Code
 	}{
 		"No client certificate": {
 			certChain:          nil,
 			caller:             nil,
 			authenticateErrMsg: "no client certificate is presented",
+			code:           codes.Unauthenticated,
 		},
 		"Unsupported auth type": {
 			certChain:          nil,
@@ -157,8 +159,8 @@ func TestCreateCertificateWithoutToken(t *testing.T) {
 		response, err := server.CreateCertificate(ctx, request)
 		s, _ := status.FromError(err)
 		code := s.Code()
-		if code != codes.OK {
-			t.Errorf("Case %s: expecting code to be (%d) but got (%d): %s", id, codes.OK, code, s.Message())
+		if code != c.code {
+			t.Errorf("Case %s: expecting code to be (%d) but got (%d): %s", id, c.code, code, s.Message())
 		}
 		if len(response.CertChain) != len(c.certChain) {
 			t.Errorf("Case %s: expecting cert chain length to be (%d) but got (%d)",
