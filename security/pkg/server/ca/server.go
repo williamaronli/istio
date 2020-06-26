@@ -82,8 +82,8 @@ func getConnectionAddress(ctx context.Context) string {
 	fmt.Printf("%v", ok)
 	fmt.Printf("%+v", peerInfo)
 	fmt.Printf("22222222222")
-	fmt.Printf("%v", peerInfo.Addr)
 	if ok {
+		fmt.Printf("%v", peerInfo.Addr)
 		peerAddr = peerInfo.Addr.String()
 	}
 	return peerAddr
