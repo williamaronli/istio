@@ -130,6 +130,7 @@ func TestCreateCertificateWithoutToken(t *testing.T) {
 			certChain:          [][]*x509.Certificate{},
 			caller:             nil,
 			authenticateErrMsg: "no verified chain is found",
+			code:           codes.Unauthenticated,
 		},
 		"With client certificate": {
 			certChain: [][]*x509.Certificate{
