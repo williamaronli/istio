@@ -167,7 +167,7 @@ func TestCreateCertificateE2EWithCertificates(t *testing.T) {
 			tlsInfo := credentials.TLSInfo{
 				State: tls.ConnectionState{VerifiedChains: c.certChain},
 			}
-			p := &peer.Peer{AuthInfo: tlsInfo}
+			p := &peer.Peer{Addr: c.ipAddr, AuthInfo: tlsInfo}
 			ctx = peer.NewContext(ctx, p)
 		}
 		if c.fakeAuthInfo != nil {
