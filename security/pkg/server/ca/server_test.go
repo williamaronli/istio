@@ -92,7 +92,7 @@ func TestCreateCertificateWithoutToken(t *testing.T) {
 		t.Error(err)
 	}
 	auth := &authenticate.ClientCertAuthenticator{}
-	certChain := []string{"cert", "cert_chain", "root_cert"}
+	//certChain := []string{"cert", "cert_chain", "root_cert"}
 	server := &Server{
 		ca:             &mockca.FakeCA{
 			SignedCert: []byte("cert"),
