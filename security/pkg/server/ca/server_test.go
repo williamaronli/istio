@@ -19,6 +19,7 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"fmt"
+	"net"
 	"os"
 	"testing"
 	"time"
@@ -113,6 +114,7 @@ func TestCreateCertificateWithoutToken(t *testing.T) {
 		authenticateErrMsg string
 		fakeAuthInfo       *mockAuthInfo
 		code 							 codes.Code
+		ipAddr						 *net.IPAddr
 	}{
 		"No client certificate": {
 			certChain:          nil,
@@ -125,6 +127,7 @@ func TestCreateCertificateWithoutToken(t *testing.T) {
 			caller:             nil,
 			authenticateErrMsg: "unsupported auth type: \"not-tls\"",
 			fakeAuthInfo:       &mockAuthInfo{"not-tls"},
+			ipAddr:			&net.IPAddr{IP: net.IPv4(192, 168, 1, 1)},
 			code: codes.Unauthenticated,
 		},
 		"Empty cert chain": {
@@ -161,9 +164,12 @@ func TestCreateCertificateWithoutToken(t *testing.T) {
 			ctx = peer.NewContext(ctx, p)
 		}
 		if c.fakeAuthInfo != nil {
-			ctx = peer.NewContext(ctx, &peer.Peer{AuthInfo: c.fakeAuthInfo})
+			//tlsInfo := credentials.TLSInfo{
+			//	State: tls.ConnectionState{VerifiedChains: c.certChain},
+			//}
+			ctx = peer.NewContext(ctx, &peer.Peer{Addr: c.ipAddr, AuthInfo: c.fakeAuthInfo})
 		}
-
+		t.Logf("sssss")
 		_, err := server.CreateCertificate(ctx, request)
 
 		s, _ := status.FromError(err)
