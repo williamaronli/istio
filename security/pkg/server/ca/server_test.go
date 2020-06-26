@@ -148,7 +148,11 @@ func TestCreateCertificateWithoutToken(t *testing.T) {
 	for id, c := range testCerts {
 		request := &pb.IstioCertificateRequest{Csr: "dumb CSR"}
 		ctx := context.Background()
+		t.Logf("oooooooooooooo")
+		t.Logf("%v",id)
+		t.Logf("%v",c.certChain)
 		if c.certChain != nil {
+			t.Logf("certchain")
 			tlsInfo := credentials.TLSInfo{
 				State: tls.ConnectionState{VerifiedChains: c.certChain},
 			}
@@ -158,8 +162,7 @@ func TestCreateCertificateWithoutToken(t *testing.T) {
 		if c.fakeAuthInfo != nil {
 			ctx = peer.NewContext(ctx, &peer.Peer{AuthInfo: c.fakeAuthInfo})
 		}
-		t.Logf("oooooooooooooo")
-		t.Logf("%v",id)
+
 		_, err := server.CreateCertificate(ctx, request)
 
 
