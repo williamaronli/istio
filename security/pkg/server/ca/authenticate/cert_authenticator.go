@@ -55,34 +55,25 @@ func (cca *ClientCertAuthenticator) AuthenticatorType() string {
 // chain validation itself.
 func (cca *ClientCertAuthenticator) Authenticate(ctx context.Context) (*Caller, error) {
 	peer, ok := peer.FromContext(ctx)
-	fmt.Printf("sssssskkkkklllll")
-	fmt.Printf("%+v\n", peer)
-	fmt.Printf("%+v\n", ctx)
-	//fmt.Printf("%+v\n", ctx.Value(struct{})
 	if !ok || peer.AuthInfo == nil {
 		return nil, fmt.Errorf("no client certificate is presented")
 	}
-	fmt.Printf("%+v\n", peer.AuthInfo.AuthType())
 	if authType := peer.AuthInfo.AuthType(); authType != "tls" {
 		return nil, fmt.Errorf("unsupported auth type: %q", authType)
 	}
 
 	tlsInfo := peer.AuthInfo.(credentials.TLSInfo)
-	fmt.Printf("%+v\n", tlsInfo)
 	chains := tlsInfo.State.VerifiedChains
-	fmt.Printf("%+v\n", chains)
 
 	if len(chains) == 0 || len(chains[0]) == 0 {
 		return nil, fmt.Errorf("no verified chain is found")
 	}
-	fmt.Printf("%+v\n", chains[0])
 
 	ids, err := util.ExtractIDs(chains[0][0].Extensions)
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Printf("ccccccccccccccclllllllssssssss")
 	return &Caller{
 		AuthSource: AuthSourceClientCertificate,
 		Identities: ids,

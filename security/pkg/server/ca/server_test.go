@@ -160,9 +160,6 @@ func TestCreateCertificateWithoutToken(t *testing.T) {
 			ctx = peer.NewContext(ctx, p)
 		}
 		if c.fakeAuthInfo != nil {
-			//tlsInfo := credentials.TLSInfo{
-			//	State: tls.ConnectionState{VerifiedChains: c.certChain},
-			//}
 			ctx = peer.NewContext(ctx, &peer.Peer{Addr: c.ipAddr, AuthInfo: c.fakeAuthInfo})
 		}
 		response, err := server.CreateCertificate(ctx, request)

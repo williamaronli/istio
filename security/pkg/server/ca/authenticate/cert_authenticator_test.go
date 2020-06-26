@@ -19,7 +19,6 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"reflect"
-	"strings"
 	"testing"
 
 	"golang.org/x/net/context"
@@ -106,16 +105,16 @@ func TestAuthenticate_clientCertAuthenticator(t *testing.T) {
 		if tc.fakeAuthInfo != nil {
 			ctx = peer.NewContext(ctx, &peer.Peer{AuthInfo: tc.fakeAuthInfo})
 		}
-		t.Logf("sssss=========")
+		//t.Logf("sssss=========")
 		result, err := auth.Authenticate(ctx)
-		t.Logf("%v", result)
-		if result != nil {
-			t.Logf("%v", strings.Join(result.Identities, ", "))
-			t.Logf("%v", len(result.Identities))
-		}
-		t.Logf("%v", result)
-		t.Logf("%v", tc.caller)
-		t.Logf("%v", id)
+		//t.Logf("%v", result)
+		//if result != nil {
+		//	t.Logf("%v", strings.Join(result.Identities, ", "))
+		//	t.Logf("%v", len(result.Identities))
+		//}
+		//t.Logf("%v", result)
+		//t.Logf("%v", tc.caller)
+		//t.Logf("%v", id)
 		if len(tc.authenticateErrMsg) > 0 {
 			if err == nil {
 				t.Errorf("Case %s: Succeeded. Error expected: %v", id, err)
