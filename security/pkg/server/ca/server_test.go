@@ -83,7 +83,7 @@ func (ai mockAuthInfo) AuthType() string {
 	return ai.authType
 }
 
-func TestCreateCertificateWithoutToken(t *testing.T) {
+func TestCreateCertificateE2EWithCertificates(t *testing.T) {
 	callerID := "test.identity"
 	ids := []util.Identity{
 		{Type: util.TypeURI, Value: []byte(callerID)},
@@ -134,6 +134,17 @@ func TestCreateCertificateWithoutToken(t *testing.T) {
 			certChain:          [][]*x509.Certificate{},
 			caller:             nil,
 			authenticateErrMsg: "no verified chain is found",
+			code:           codes.Unauthenticated,
+		},
+		"Certificate has no SAN": {
+			certChain: [][]*x509.Certificate{
+				{
+					{
+						Version: 1,
+					},
+				},
+			},
+			authenticateErrMsg: "the SAN extension does not exist",
 			code:           codes.Unauthenticated,
 		},
 		"With client certificate": {
