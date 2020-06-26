@@ -124,7 +124,6 @@ func TestCreateCertificateWithoutToken(t *testing.T) {
 			certChain:          nil,
 			caller:             nil,
 			authenticateErrMsg: "unsupported auth type: \"not-tls\"",
-			fakeAuthInfo:       &mockAuthInfo{"not-tls"},
 			code: codes.Unauthenticated,
 		},
 		"Empty cert chain": {
