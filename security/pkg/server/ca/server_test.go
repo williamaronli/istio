@@ -17,6 +17,7 @@ package ca
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"crypto/x509/pkix"
 	"fmt"
 	"os"
 	"testing"
@@ -24,7 +25,10 @@ import (
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/status"
+	"istio.io/istio/security/pkg/pki/util"
 	"k8s.io/client-go/kubernetes/fake"
 
 	"istio.io/istio/pkg/jwt"
@@ -68,6 +72,105 @@ func (authn *mockAuthenticator) Authenticate(ctx context.Context) (*authenticate
 		AuthSource: authn.authSource,
 		Identities: authn.identities,
 	}, nil
+}
+
+type mockAuthInfo struct {
+	authType string
+}
+
+func (ai mockAuthInfo) AuthType() string {
+	return ai.authType
+}
+
+func TestCreateCertificateWithoutToken(t *testing.T) {
+	callerID := "test.identity"
+	ids := []util.Identity{
+		{Type: util.TypeURI, Value: []byte(callerID)},
+	}
+	sanExt, err := util.BuildSANExtension(ids)
+	if err != nil {
+		t.Error(err)
+	}
+	auth := &authenticate.ClientCertAuthenticator{}
+	certChain := []string{"cert", "cert_chain", "root_cert"}
+	server := &Server{
+		ca:             &mockca.FakeCA{
+			SignedCert: []byte("cert"),
+			KeyCertBundle: &mockutil.FakeKeyCertBundle{
+				CertChainBytes: []byte("cert_chain"),
+				RootCertBytes:  []byte("root_cert"),
+			},
+		},
+		hostnames:      []string{"hostname"},
+		port:           8080,
+		Authenticators: []authenticate.Authenticator{auth},
+		monitoring:     newMonitoringMetrics(),
+	}
+
+	testCerts := map[string]struct {
+		certChain          [][]*x509.Certificate
+		caller             *authenticate.Caller
+		authenticateErrMsg string
+		fakeAuthInfo       *mockAuthInfo
+	}{
+		"No client certificate": {
+			certChain:          nil,
+			caller:             nil,
+			authenticateErrMsg: "no client certificate is presented",
+		},
+		"Unsupported auth type": {
+			certChain:          nil,
+			caller:             nil,
+			authenticateErrMsg: "unsupported auth type: \"not-tls\"",
+			fakeAuthInfo:       &mockAuthInfo{"not-tls"},
+		},
+		"Empty cert chain": {
+			certChain:          [][]*x509.Certificate{},
+			caller:             nil,
+			authenticateErrMsg: "no verified chain is found",
+		},
+		"With client certificate": {
+			certChain: [][]*x509.Certificate{
+				{
+					{
+						Extensions: []pkix.Extension{*sanExt},
+					},
+				},
+			},
+			caller: &authenticate.Caller{Identities: []string{callerID}},
+		},
+	}
+
+	for id, c := range testCerts {
+		request := &pb.IstioCertificateRequest{Csr: "dumb CSR"}
+		ctx := context.Background()
+		if c.certChain != nil {
+			tlsInfo := credentials.TLSInfo{
+				State: tls.ConnectionState{VerifiedChains: c.certChain},
+			}
+			p := &peer.Peer{AuthInfo: tlsInfo}
+			ctx = peer.NewContext(ctx, p)
+		}
+		if c.fakeAuthInfo != nil {
+			ctx = peer.NewContext(ctx, &peer.Peer{AuthInfo: c.fakeAuthInfo})
+		}
+		response, err := server.CreateCertificate(ctx, request)
+		s, _ := status.FromError(err)
+		code := s.Code()
+		if code != codes.OK {
+			t.Errorf("Case %s: expecting code to be (%d) but got (%d): %s", id, codes.OK, code, s.Message())
+		}
+		if len(response.CertChain) != len(c.certChain) {
+			t.Errorf("Case %s: expecting cert chain length to be (%d) but got (%d)",
+				id, len(c.certChain), len(response.CertChain))
+		}
+		for i, v := range response.CertChain {
+			if v != certChain[i] {
+				t.Errorf("Case %s: expecting cert to be (%s) but got (%s) at position [%d] of cert chain.",
+					id, c.certChain, v, i)
+			}
+		}
+	}
 }
 
 func TestCreateCertificate(t *testing.T) {
@@ -149,7 +252,6 @@ func TestCreateCertificate(t *testing.T) {
 						id, c.certChain, v, i)
 				}
 			}
-
 		}
 	}
 }
