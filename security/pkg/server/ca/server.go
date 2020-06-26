@@ -73,6 +73,8 @@ type Server struct {
 }
 
 func getConnectionAddress(ctx context.Context) string {
+	fmt.Printf("getConnectionAddress")
+	fmt.Printf("%s", ctx)
 	peerInfo, ok := peer.FromContext(ctx)
 	peerAddr := "unknown"
 	fmt.Printf("%v", peerInfo)
