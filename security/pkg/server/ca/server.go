@@ -77,7 +77,8 @@ func getConnectionAddress(ctx context.Context) string {
 	fmt.Printf("%s", ctx)
 	peerInfo, ok := peer.FromContext(ctx)
 	peerAddr := "unknown"
-	fmt.Printf("%v", peerInfo)
+	fmt.Printf("%v", peerInfo.Addr)
+	fmt.Printf("%v", ok)
 	if ok {
 		peerAddr = peerInfo.Addr.String()
 	}
