@@ -58,13 +58,13 @@ func (cca *ClientCertAuthenticator) Authenticate(ctx context.Context) (*Caller, 
 	if !ok || peer.AuthInfo == nil {
 		return nil, fmt.Errorf("no client certificate is presented")
 	}
+
 	if authType := peer.AuthInfo.AuthType(); authType != "tls" {
 		return nil, fmt.Errorf("unsupported auth type: %q", authType)
 	}
 
 	tlsInfo := peer.AuthInfo.(credentials.TLSInfo)
 	chains := tlsInfo.State.VerifiedChains
-
 	if len(chains) == 0 || len(chains[0]) == 0 {
 		return nil, fmt.Errorf("no verified chain is found")
 	}

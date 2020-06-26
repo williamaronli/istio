@@ -105,6 +105,7 @@ func TestAuthenticate_clientCertAuthenticator(t *testing.T) {
 		if tc.fakeAuthInfo != nil {
 			ctx = peer.NewContext(ctx, &peer.Peer{AuthInfo: tc.fakeAuthInfo})
 		}
+
 		result, err := auth.Authenticate(ctx)
 		if len(tc.authenticateErrMsg) > 0 {
 			if err == nil {
