@@ -152,11 +152,7 @@ func TestCreateCertificateWithoutToken(t *testing.T) {
 	for id, c := range testCerts {
 		request := &pb.IstioCertificateRequest{Csr: "dumb CSR"}
 		ctx := context.Background()
-		t.Logf("oooooooooooooo")
-		t.Logf("%v",id)
-		t.Logf("%v",c.certChain)
 		if c.certChain != nil && len(c.certChain) != 0{
-			t.Logf("certchain")
 			tlsInfo := credentials.TLSInfo{
 				State: tls.ConnectionState{VerifiedChains: c.certChain},
 			}
@@ -169,22 +165,18 @@ func TestCreateCertificateWithoutToken(t *testing.T) {
 			//}
 			ctx = peer.NewContext(ctx, &peer.Peer{Addr: c.ipAddr, AuthInfo: c.fakeAuthInfo})
 		}
-		t.Logf("sssss")
-		_, err := server.CreateCertificate(ctx, request)
+		response, err := server.CreateCertificate(ctx, request)
 
 		s, _ := status.FromError(err)
-		t.Logf("%v",s)
 		code := s.Code()
-		t.Logf("codecodecode")
-		t.Logf("%v",code)
 
 		if code != c.code {
 			t.Errorf("Case %s: expecting code to be (%d) but got (%d): %s", id, c.code, code, s.Message())
 		}
-		//if len(response.CertChain) != len(c.certChain) {
-		//	t.Errorf("Case %s: expecting cert chain length to be (%d) but got (%d)",
-		//		id, len(c.certChain), len(response.CertChain))
-		//}
+		if len(response.CertChain) != len(c.certChain) {
+			t.Errorf("Case %s: expecting cert chain length to be (%d) but got (%d)",
+				id, len(c.certChain), len(response.CertChain))
+		}
 		//for i, v := range response.CertChain {
 		//	if v != certChain[i] {
 		//		//t.Errorf("Case %s: expecting cert to be (%s) but got (%s) at position [%d] of cert chain.",
