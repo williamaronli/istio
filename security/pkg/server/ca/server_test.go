@@ -117,7 +117,7 @@ func TestCreateCertificateWithoutToken(t *testing.T) {
 		"No client certificate": {
 			certChain:          nil,
 			caller:             nil,
-			authenticateErrMsg: "no client certificate is presented",
+			authenticateErrMsg: "no client certificate is presentedssss",
 			code:           codes.Unauthenticated,
 		},
 		"Unsupported auth type": {
