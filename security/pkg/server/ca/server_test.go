@@ -120,6 +120,7 @@ func TestCreateCertificateE2EWithCertificates(t *testing.T) {
 			certChain:          nil,
 			caller:             nil,
 			authenticateErrMsg: "no client certificate is presentedssss",
+			ipAddr:			&net.IPAddr{IP: net.IPv4(192, 168, 1, 1)},
 			code:           codes.Unauthenticated,
 		},
 		"Unsupported auth type": {
@@ -134,6 +135,7 @@ func TestCreateCertificateE2EWithCertificates(t *testing.T) {
 			certChain:          [][]*x509.Certificate{},
 			caller:             nil,
 			authenticateErrMsg: "no verified chain is found",
+			ipAddr:			&net.IPAddr{IP: net.IPv4(192, 168, 1, 1)},
 			code:           codes.Unauthenticated,
 		},
 		"Certificate has no SAN": {
@@ -145,6 +147,7 @@ func TestCreateCertificateE2EWithCertificates(t *testing.T) {
 				},
 			},
 			authenticateErrMsg: "the SAN extension does not exist",
+			ipAddr:			&net.IPAddr{IP: net.IPv4(192, 168, 1, 1)},
 			code:           codes.Unauthenticated,
 		},
 		"With client certificate": {
@@ -156,6 +159,7 @@ func TestCreateCertificateE2EWithCertificates(t *testing.T) {
 				},
 			},
 			caller: &authenticate.Caller{Identities: []string{callerID}},
+			ipAddr:			&net.IPAddr{IP: net.IPv4(192, 168, 1, 1)},
 			code:      codes.OK,
 		},
 	}
