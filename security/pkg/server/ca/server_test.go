@@ -29,8 +29,9 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/status"
-	"istio.io/istio/security/pkg/pki/util"
 	"k8s.io/client-go/kubernetes/fake"
+
+	"istio.io/istio/security/pkg/pki/util"
 
 	"istio.io/istio/pkg/jwt"
 	"istio.io/istio/security/pkg/pki/ca"
@@ -95,7 +96,7 @@ func TestCreateCertificateE2EWithCertificates(t *testing.T) {
 	auth := &authenticate.ClientCertAuthenticator{}
 
 	server := &Server{
-		ca:             &mockca.FakeCA{
+		ca: &mockca.FakeCA{
 			SignedCert: []byte("cert"),
 			KeyCertBundle: &mockutil.FakeKeyCertBundle{
 				CertChainBytes: []byte("cert_chain"),
@@ -113,30 +114,30 @@ func TestCreateCertificateE2EWithCertificates(t *testing.T) {
 		caller             *authenticate.Caller
 		authenticateErrMsg string
 		fakeAuthInfo       *mockAuthInfo
-		code 							 codes.Code
-		ipAddr						 *net.IPAddr
+		code               codes.Code
+		ipAddr             *net.IPAddr
 	}{
 		"No client certificate": {
 			certChain:          nil,
 			caller:             nil,
 			authenticateErrMsg: "no client certificate is presentedssss",
-			ipAddr:			&net.IPAddr{IP: net.IPv4(192, 168, 1, 1)},
-			code:           codes.Unauthenticated,
+			ipAddr:             &net.IPAddr{IP: net.IPv4(192, 168, 1, 1)},
+			code:               codes.Unauthenticated,
 		},
 		"Unsupported auth type": {
 			certChain:          nil,
 			caller:             nil,
 			authenticateErrMsg: "unsupported auth type: \"not-tls\"",
 			fakeAuthInfo:       &mockAuthInfo{"not-tls"},
-			ipAddr:			&net.IPAddr{IP: net.IPv4(192, 168, 1, 1)},
-			code: codes.Unauthenticated,
+			ipAddr:             &net.IPAddr{IP: net.IPv4(192, 168, 1, 1)},
+			code:               codes.Unauthenticated,
 		},
 		"Empty cert chain": {
 			certChain:          [][]*x509.Certificate{},
 			caller:             nil,
 			authenticateErrMsg: "no verified chain is found",
-			ipAddr:			&net.IPAddr{IP: net.IPv4(192, 168, 1, 1)},
-			code:           codes.Unauthenticated,
+			ipAddr:             &net.IPAddr{IP: net.IPv4(192, 168, 1, 1)},
+			code:               codes.Unauthenticated,
 		},
 		"Certificate has no SAN": {
 			certChain: [][]*x509.Certificate{
@@ -147,8 +148,8 @@ func TestCreateCertificateE2EWithCertificates(t *testing.T) {
 				},
 			},
 			authenticateErrMsg: "the SAN extension does not exist",
-			ipAddr:			&net.IPAddr{IP: net.IPv4(192, 168, 1, 1)},
-			code:           codes.Unauthenticated,
+			ipAddr:             &net.IPAddr{IP: net.IPv4(192, 168, 1, 1)},
+			code:               codes.Unauthenticated,
 		},
 		"With client certificate": {
 			certChain: [][]*x509.Certificate{
@@ -159,15 +160,15 @@ func TestCreateCertificateE2EWithCertificates(t *testing.T) {
 				},
 			},
 			caller: &authenticate.Caller{Identities: []string{callerID}},
-			ipAddr:			&net.IPAddr{IP: net.IPv4(192, 168, 1, 1)},
-			code:      codes.OK,
+			ipAddr: &net.IPAddr{IP: net.IPv4(192, 168, 1, 1)},
+			code:   codes.OK,
 		},
 	}
 
 	for id, c := range testCerts {
 		request := &pb.IstioCertificateRequest{Csr: "dumb CSR"}
 		ctx := context.Background()
-		if c.certChain != nil && len(c.certChain) != 0{
+		if c.certChain != nil && len(c.certChain) != 0 {
 			tlsInfo := credentials.TLSInfo{
 				State: tls.ConnectionState{VerifiedChains: c.certChain},
 			}
