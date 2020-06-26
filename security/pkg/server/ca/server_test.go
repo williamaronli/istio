@@ -158,9 +158,10 @@ func TestCreateCertificateWithoutToken(t *testing.T) {
 		if c.fakeAuthInfo != nil {
 			ctx = peer.NewContext(ctx, &peer.Peer{AuthInfo: c.fakeAuthInfo})
 		}
-		_, err := server.CreateCertificate(ctx, request)
 		t.Logf("oooooooooooooo")
 		t.Logf("%v",id)
+		_, err := server.CreateCertificate(ctx, request)
+
 
 		s, _ := status.FromError(err)
 		t.Logf("%v",s)
