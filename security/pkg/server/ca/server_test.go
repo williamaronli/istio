@@ -151,7 +151,7 @@ func TestCreateCertificateWithoutToken(t *testing.T) {
 		t.Logf("oooooooooooooo")
 		t.Logf("%v",id)
 		t.Logf("%v",c.certChain)
-		if c.certChain != nil {
+		if c.certChain != nil && len(c.certChain) != 0{
 			t.Logf("certchain")
 			tlsInfo := credentials.TLSInfo{
 				State: tls.ConnectionState{VerifiedChains: c.certChain},
