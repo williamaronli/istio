@@ -140,6 +140,8 @@ func TestCreateCertificateE2EUsingClientCertauthenticator(t *testing.T) {
 			certChain:          [][]*x509.Certificate{},
 			caller:             nil,
 			authenticateErrMsg: "no verified chain is found",
+			ipAddr:             mockIpAddr,
+			code:               codes.Unauthenticated,
 		},
 		"Certificate has no SAN": {
 			certChain: [][]*x509.Certificate{
@@ -181,7 +183,7 @@ func TestCreateCertificateE2EUsingClientCertauthenticator(t *testing.T) {
 			ctx = peer.NewContext(ctx, &peer.Peer{Addr: c.ipAddr, AuthInfo: c.fakeAuthInfo})
 		}
 		response, err := server.CreateCertificate(ctx, request)
-		t.Logf("%v",id)
+
 		s, _ := status.FromError(err)
 		code := s.Code()
 		t.Logf("ssssssssss")
