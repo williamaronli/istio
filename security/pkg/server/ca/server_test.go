@@ -188,6 +188,7 @@ func TestCreateCertificateE2EUsingClientCertauthenticator(t *testing.T) {
 		code := s.Code()
 		t.Logf("ssssssssss")
 		t.Logf("%v",s)
+		t.Logf("%v",err)
 		if code != c.code {
 			t.Errorf("Case %s: expecting code to be (%d) but got (%d): %s", id, c.code, code, s.Message())
 		} else if c.code == codes.OK {
