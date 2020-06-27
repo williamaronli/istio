@@ -87,7 +87,7 @@ func (ai mockAuthInfo) AuthType() string {
 /*This is a testing to send a request to the server using
 the client cert authenticator instead of mock authenticator
 */
-func TestCreateCertificateE2EUsingClientCertauthenticator(t *testing.T) {
+func TestCreateCertificateE2EUsingClientCertAuthenticator(t *testing.T) {
 	callerID := "test.identity"
 	ids := []util.Identity{
 		{Type: util.TypeURI, Value: []byte(callerID)},
