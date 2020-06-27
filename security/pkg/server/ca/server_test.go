@@ -172,6 +172,7 @@ func TestCreateCertificateE2EUsingClientCertauthenticator(t *testing.T) {
 	for id, c := range testCerts {
 		request := &pb.IstioCertificateRequest{Csr: "dumb CSR"}
 		ctx := context.Background()
+		t.Logf("%v", id)
 		if c.certChain != nil && len(c.certChain) != 0 {
 			tlsInfo := credentials.TLSInfo{
 				State: tls.ConnectionState{VerifiedChains: c.certChain},
