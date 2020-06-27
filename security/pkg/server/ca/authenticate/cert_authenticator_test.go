@@ -95,9 +95,6 @@ func TestAuthenticate_clientCertAuthenticator(t *testing.T) {
 	auth := &ClientCertAuthenticator{}
 
 	for id, tc := range testCases {
-		if id == "Empty cert chain" {
-			t.Logf("TestAuthenticate_clientCertAuthenticatorssssssssss")
-		}
 		ctx := context.Background()
 		if tc.certChain != nil {
 			tlsInfo := credentials.TLSInfo{
