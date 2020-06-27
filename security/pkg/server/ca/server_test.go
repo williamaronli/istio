@@ -140,6 +140,7 @@ func TestCreateCertificateE2EUsingClientCertAuthenticator(t *testing.T) {
 			certChain:          [][]*x509.Certificate{},
 			caller:             nil,
 			authenticateErrMsg: "no verified chain is found",
+			fakeAuthInfo:       &mockAuthInfo{"tls"},
 			ipAddr:             mockIpAddr,
 			code:               codes.Unauthenticated,
 		},
