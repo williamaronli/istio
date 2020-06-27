@@ -140,7 +140,6 @@ func TestCreateCertificateE2EUsingClientCertAuthenticator(t *testing.T) {
 			certChain:          [][]*x509.Certificate{},
 			caller:             nil,
 			authenticateErrMsg: "no verified chain is found",
-			fakeAuthInfo:       &mockAuthInfo{"tls"},
 			ipAddr:             mockIpAddr,
 			code:               codes.Unauthenticated,
 		},
@@ -174,7 +173,7 @@ func TestCreateCertificateE2EUsingClientCertAuthenticator(t *testing.T) {
 		request := &pb.IstioCertificateRequest{Csr: "dumb CSR"}
 		ctx := context.Background()
 		t.Logf("%v", id)
-		if c.certChain != nil && len(c.certChain) != 0 {
+		if c.certChain != nil {
 			tlsInfo := credentials.TLSInfo{
 				State: tls.ConnectionState{VerifiedChains: c.certChain},
 			}
