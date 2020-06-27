@@ -84,7 +84,10 @@ func (ai mockAuthInfo) AuthType() string {
 	return ai.authType
 }
 
-func TestCreateCertificateE2EWithCertificates(t *testing.T) {
+/*This is a testing to send a request to the server using
+the client cert authenticator instead of mock authenticator
+*/
+func TestCreateCertificateE2EUsingClientCertauthenticator(t *testing.T) {
 	callerID := "test.identity"
 	ids := []util.Identity{
 		{Type: util.TypeURI, Value: []byte(callerID)},
@@ -109,6 +112,7 @@ func TestCreateCertificateE2EWithCertificates(t *testing.T) {
 		monitoring:     newMonitoringMetrics(),
 	}
 	mockCertChain := []string{"cert", "cert_chain", "root_cert"}
+	mockIpAddr := &net.IPAddr{IP: net.IPv4(192, 168, 1, 1)}
 	testCerts := map[string]struct {
 		certChain          [][]*x509.Certificate
 		caller             *authenticate.Caller
@@ -120,8 +124,8 @@ func TestCreateCertificateE2EWithCertificates(t *testing.T) {
 		"No client certificate": {
 			certChain:          nil,
 			caller:             nil,
-			authenticateErrMsg: "no client certificate is presentedssss",
-			ipAddr:             &net.IPAddr{IP: net.IPv4(192, 168, 1, 1)},
+			authenticateErrMsg: "no client certificate is presented",
+			ipAddr:             mockIpAddr,
 			code:               codes.Unauthenticated,
 		},
 		"Unsupported auth type": {
@@ -136,7 +140,7 @@ func TestCreateCertificateE2EWithCertificates(t *testing.T) {
 			certChain:          [][]*x509.Certificate{},
 			caller:             nil,
 			authenticateErrMsg: "no verified chain is found",
-			ipAddr:             &net.IPAddr{IP: net.IPv4(192, 168, 1, 1)},
+			ipAddr:             mockIpAddr,
 			code:               codes.Unauthenticated,
 		},
 		"Certificate has no SAN": {
@@ -148,7 +152,7 @@ func TestCreateCertificateE2EWithCertificates(t *testing.T) {
 				},
 			},
 			authenticateErrMsg: "the SAN extension does not exist",
-			ipAddr:             &net.IPAddr{IP: net.IPv4(192, 168, 1, 1)},
+			ipAddr:             mockIpAddr,
 			code:               codes.Unauthenticated,
 		},
 		"With client certificate": {
@@ -160,7 +164,7 @@ func TestCreateCertificateE2EWithCertificates(t *testing.T) {
 				},
 			},
 			caller: &authenticate.Caller{Identities: []string{callerID}},
-			ipAddr: &net.IPAddr{IP: net.IPv4(192, 168, 1, 1)},
+			ipAddr: mockIpAddr,
 			code:   codes.OK,
 		},
 	}
@@ -182,7 +186,8 @@ func TestCreateCertificateE2EWithCertificates(t *testing.T) {
 
 		s, _ := status.FromError(err)
 		code := s.Code()
-
+		t.Logf("ssssssssss")
+		t.Logf("v%", s)
 		if code != c.code {
 			t.Errorf("Case %s: expecting code to be (%d) but got (%d): %s", id, c.code, code, s.Message())
 		} else if c.code == codes.OK {
