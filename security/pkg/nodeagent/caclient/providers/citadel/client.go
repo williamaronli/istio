@@ -135,6 +135,10 @@ func (c *citadelClient) getTLSDialOption() (grpc.DialOption, error) {
 	config := tls.Config{
 		Certificates: []tls.Certificate{certificate},
 		GetClientCertificate: func(*tls.CertificateRequestInfo) (*tls.Certificate, error) {
+			//1. ProvCert explicitly set to in-memory
+			//2. check the client environment in VM or kubernetes pod
+			//3. get cert from in-memory bundle
+
 			if ProvCert != "" {
 				// Load the certificate from disk
 				certificate, err = tls.LoadX509KeyPair(ProvCert+"/cert-chain.pem", ProvCert+"/key.pem")
