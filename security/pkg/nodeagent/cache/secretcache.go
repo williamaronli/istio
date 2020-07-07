@@ -909,8 +909,10 @@ func (sc *SecretCache) generateSecret(ctx context.Context, token string, connKey
 		return nil, err
 	}
 
-	cacheLog.Debugf("%s received CSR response with certificate chain %+v \n",
+	cacheLog.Infof("%s received CSR response with certificate chain %+v \n",
 		logPrefix, certChainPEM)
+
+	cacheLog.Infof("mmmmmmmmmm")
 
 	certChain := []byte{}
 	for _, c := range certChainPEM {
