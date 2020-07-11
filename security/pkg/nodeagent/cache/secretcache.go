@@ -295,6 +295,9 @@ func (sc *SecretCache) GenerateSecret(ctx context.Context, connectionID, resourc
 		// If working as Citadel agent, send request for normal key/cert pair.
 		// If working as ingress gateway agent, fetch key/cert or root cert from SecretFetcher. Resource name for
 		// root cert ends with "-cacert".
+		cacheLog.Infof("hhhhhhhhhhhhh")
+		cacheLog.Infof("RootCertReqResourceName")
+		cacheLog.Infof("hhhhhhhhhhhhh")
 		ns, err := sc.generateSecret(ctx, token, connKey, time.Now())
 		if err != nil {
 			cacheLog.Errorf("%s failed to generate secret for proxy: %v",
@@ -500,7 +503,7 @@ func (sc *SecretCache) keyCertRotationJob() {
 	sc.rotationTicker = time.NewTicker(sc.configOptions.RotationInterval)
 	cacheLog.Infof("kkkkkkkkkkkkkkkmmmmmmmmmmmm")
 	cacheLog.Infof("%+v", sc.configOptions.RotationInterval.Seconds())
-	sc.configOptions.RotationInterval = time.Duration(time.Second * 10)
+	sc.configOptions.RotationInterval = time.Second * 10
 	cacheLog.Infof("%+v", sc.configOptions.RotationInterval.Seconds())
 	for {
 		select {
