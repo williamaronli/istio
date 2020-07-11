@@ -91,6 +91,7 @@ func (s *Server) CreateCertificate(ctx context.Context, request *pb.IstioCertifi
 	*pb.IstioCertificateResponse, error) {
 	s.monitoring.CSR.Increment()
 	caller := s.authenticate(ctx)
+
 	if caller == nil {
 		s.monitoring.AuthnError.Increment()
 		return nil, status.Error(codes.Unauthenticated, "request authenticate failure")
@@ -116,7 +117,10 @@ func (s *Server) CreateCertificate(ctx context.Context, request *pb.IstioCertifi
 	}
 	s.monitoring.Success.Increment()
 	serverCaLog.Debug("CSR successfully signed.")
+	serverCaLog.Infof("010101010101")
+	serverCaLog.Infof("context: %+v", ctx)
 
+	serverCaLog.Infof("010101010101")
 	return response, nil
 }
 

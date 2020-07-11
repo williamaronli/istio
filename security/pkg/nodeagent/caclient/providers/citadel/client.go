@@ -87,7 +87,10 @@ func (c *CitadelClient) CSRSign(ctx context.Context, reqID string, csrPEM []byte
 		Csr:              string(csrPEM),
 		ValidityDuration: certValidTTLInSec,
 	}
-
+	citadelClientLog.Infof("8888888888")
+	citadelClientLog.Infof("token : CSRSIGN: %+v", token)
+	citadelClientLog.Infof("token : withtoken: %+v", withToken)
+	citadelClientLog.Infof("8888888888")
 	// add Bearer prefix, which is required by Citadel.
 	if withToken {
 		token = bearerTokenPrefix + token
