@@ -212,6 +212,5 @@ func (c *citadelClient) buildConnection(isRotate bool) (*grpc.ClientConn, error)
 		return nil, fmt.Errorf("failed to connect to endpoint %s", c.caEndpoint)
 	}
 
-	c.client = pb.NewIstioCertificateServiceClient(conn)
 	return conn, nil
 }
