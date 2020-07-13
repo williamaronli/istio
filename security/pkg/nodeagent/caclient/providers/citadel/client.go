@@ -70,7 +70,10 @@ func NewCitadelClient(endpoint string, tls bool, rootCert []byte, clusterID stri
 		caTLSRootCert: rootCert,
 		clusterID:     clusterID,
 	}
-
+	citadelClientLog.Infof("sssssssskkkkkkkkkkk")
+	citadelClientLog.Infof("%+v\n", OutputKeyCertToDir)
+	citadelClientLog.Infof("%+v\n", ProvCert)
+	citadelClientLog.Infof("sssssssskkkkkkkkkkk")
 	conn, err := c.buildConnection(isRotate)
 	if err != nil {
 		return nil, err
