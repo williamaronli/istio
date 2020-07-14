@@ -50,9 +50,9 @@ var (
 	// The total timeout for any credential retrieval process, default value of 10s is used.
 	totalTimeout = time.Second * 10
 
-	// SupportRotationWithCert is a field controlling the use the cert for rotation
+	// UseRotationWithCert is a field controlling the use the cert for rotation
 	// If is set to true, we will use the old cert to rotate instead of token
-	SupportRotationWithCert = env.RegisterBoolVar("SUPPORT_ROTATION_WITH_CERT", false,
+	UseRotationWithCert = env.RegisterBoolVar("USE_ROTATION_WITH_CERT", false,
 		"If the flag is set to true, use cert, instead of token to rotate.").Get()
 )
 
@@ -94,8 +94,6 @@ const (
 	// DefaultRootCertFilePath is the well-known path for an existing root certificate file
 	DefaultRootCertFilePath = "./etc/certs/root-cert.pem"
 
-	// CSR empty token, will be applied when the CSR request doesn't contain a token
-	EmptyToken = ""
 )
 
 type k8sJwtPayload struct {
@@ -642,8 +640,8 @@ func (sc *SecretCache) rotate(updateRootFlag bool) {
 		// Re-generate secret if it's expired.
 		if sc.shouldRotate(&secret) {
 			atomic.AddUint64(&sc.secretChangedCount, 1)
-			if SupportRotationWithCert {
-				err := sc.fetcher.ResetClientConnectionForCertRotation(true)
+			if UseRotationWithCert {
+				err := sc.fetcher.CaClient.Reconnect(true)
 				if err != nil {
 					cacheLog.Errorf("%s Connection Reset fails", logPrefix)
 					// Send the notification to close the stream if reconnection fails, so that client could re-connect with a new token.
@@ -668,9 +666,9 @@ func (sc *SecretCache) rotate(updateRootFlag bool) {
 				// When cert has expired, we could make it simple by assuming token has already expired.
 				var ns *model.SecretItem
 				var err error
-				if SupportRotationWithCert {
+				if UseRotationWithCert {
 					// it user set it to SupportRotationWithCert True rotate the cert using old valid cert without token
-					ns, err = sc.generateSecret(context.Background(), EmptyToken ,connKey, now, false)
+					ns, err = sc.generateSecret(context.Background(), "" ,connKey, now, false)
 				} else {
 					ns, err = sc.generateSecret(context.Background(), secret.Token, connKey, now, true)
 				}
@@ -1050,13 +1048,11 @@ func (sc *SecretCache) sendRetriableRequest(ctx context.Context, csrPEM []byte,
 		var httpRespCode int
 		if isCSR {
 			requestErrorString = fmt.Sprintf("%s CSR", logPrefix)
-			if withToken {
-				certChainPEM, err = sc.fetcher.CaClient.CSRSign(
-					ctx, reqID, csrPEM, exchangedToken, int64(sc.configOptions.SecretTTL.Seconds()), true)
-			} else {
-				certChainPEM, err = sc.fetcher.CaClient.CSRSign(
-					ctx, reqID, csrPEM, EmptyToken, int64(sc.configOptions.SecretTTL.Seconds()), false)
+			if !withToken {
+				exchangedToken = ""
 			}
+			certChainPEM, err = sc.fetcher.CaClient.CSRSign(
+				ctx, reqID, csrPEM, exchangedToken, int64(sc.configOptions.SecretTTL.Seconds()))
 		} else {
 			requestErrorString = fmt.Sprintf("%s TokExch", logPrefix)
 			p := sc.configOptions.Plugins[0]

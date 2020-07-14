@@ -21,6 +21,6 @@ import (
 // Client interface defines the clients need to implement to talk to CA for CSR.
 type Client interface {
 	CSRSign(ctx context.Context, reqID string, csrPEM []byte, subjectID string,
-		certValidTTLInSec int64, withToken bool) ([]string /*PEM-encoded certificate chain*/, error)
+		certValidTTLInSec int64) ([]string /*PEM-encoded certificate chain*/, error)
 	Reconnect(isRotate bool) error
 }
