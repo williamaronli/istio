@@ -131,7 +131,7 @@ func (c *CitadelClient) getTLSDialOption() (grpc.DialOption, error) {
 		GetClientCertificate: func(*tls.CertificateRequestInfo) (*tls.Certificate, error) {
 			if ProvCertPath != "" {
 				// Load the certificate from disk
-				certificate, err = tls.LoadX509KeyPair(ProvCert+"/cert-chain.pem", ProvCert+"/key.pem")
+				certificate, err = tls.LoadX509KeyPair(ProvCertPath+"/cert-chain.pem", ProvCertPath+"/key.pem")
 				if err != nil {
 					// we will return an empty cert so that when user sets the Prov cert path
 					// but not have such cert in the file path we use the token to provide verification
