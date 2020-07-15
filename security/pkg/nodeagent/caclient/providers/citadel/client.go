@@ -173,7 +173,7 @@ func (c *citadelClient) getTLSDialOption(isRotate bool) (grpc.DialOption, error)
 				citadelClientLog.Infof("123123123131%+v", certificate)
 				if err != nil {
 					citadelClientLog.Infof("jjjjjjjjjjjjjjj")
-					return nil, nil
+					return &certificate, nil
 				}
 			}
 			return &certificate, nil
