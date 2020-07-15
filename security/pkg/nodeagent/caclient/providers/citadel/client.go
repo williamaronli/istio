@@ -46,6 +46,9 @@ var (
 	// with extra SAN (labels, etc) in data path.
 	ProvCert = env.RegisterStringVar("PROV_CERT", "",
 		"Set to a directory containing provisioned certs, for VMs").Get()
+
+	provCertPath = env.RegisterStringVar("PROV_CERT_PATH", "",
+		"Set to a directory containing provisioned certs, for VMs").Get()
 )
 
 type citadelClient struct {
@@ -88,6 +91,8 @@ func (c *citadelClient) CSRSign(ctx context.Context, reqID string, csrPEM []byte
 		token = bearerTokenPrefix + token
 		ctx = metadata.NewOutgoingContext(ctx, metadata.Pairs("Authorization", token, "ClusterID", c.clusterID))
 	} else {
+		citadelClientLog.Infof("kkkkksssssss")
+		citadelClientLog.Infof("withtoken: %+v ", token)
 		err := c.reconnect()
 		if err != nil {
 			citadelClientLog.Errorf("Failed to Reconnect: %v", err)
@@ -131,9 +136,9 @@ func (c *citadelClient) getTLSDialOption() (grpc.DialOption, error) {
 	config := tls.Config{
 		Certificates: []tls.Certificate{certificate},
 		GetClientCertificate: func(*tls.CertificateRequestInfo) (*tls.Certificate, error) {
-			if ProvCert != "" {
+			if provCertPath != "" {
 				// Load the certificate from disk
-				certificate, err = tls.LoadX509KeyPair(ProvCert+"/cert-chain.pem", ProvCert+"/key.pem")
+				certificate, err = tls.LoadX509KeyPair(provCertPath+"/cert-chain.pem", provCertPath+"/key.pem")
 				if err != nil {
 					// we will return an empty cert so that when user sets the Prov cert path
 					// but not have such cert in the file path we use the token to provide verification

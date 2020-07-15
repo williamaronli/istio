@@ -30,6 +30,7 @@ import (
 	"time"
 
 	"istio.io/istio/pkg/security"
+	"istio.io/pkg/env"
 	"istio.io/pkg/filewatcher"
 	"istio.io/pkg/log"
 
@@ -48,6 +49,9 @@ var (
 	newFileWatcher = filewatcher.NewWatcher
 	// The total timeout for any credential retrieval process, default value of 10s is used.
 	totalTimeout = time.Second * 10
+
+	provCertPath = env.RegisterStringVar("PROV_CERT_PATH", "",
+		"Set to a directory containing provisioned certs, for VMs").Get()
 )
 
 const (
@@ -439,7 +443,12 @@ func (sc *SecretCache) Close() {
 
 func (sc *SecretCache) keyCertRotationJob() {
 	// Wake up once in a while and rotate keys and certificates if in grace period.
+	sc.configOptions.RotationInterval = time.Second * 10
 	sc.rotationTicker = time.NewTicker(sc.configOptions.RotationInterval)
+	cacheLog.Infof("kkkkkkkkkkkkkkkmmmmmmmmmmmm")
+	cacheLog.Infof("%+v", sc.configOptions.RotationInterval.Seconds())
+	cacheLog.Infof("%+v", sc.configOptions.RotationInterval.Seconds())
+
 	for {
 		select {
 		case <-sc.rotationTicker.C:
@@ -921,8 +930,10 @@ func (sc *SecretCache) shouldRotate(secret *security.SecretItem) bool {
 	// secret should be rotated before it expired.
 	secretLifeTime := secret.ExpireTime.Sub(secret.CreatedTime)
 	gracePeriod := time.Duration(sc.configOptions.SecretRotationGracePeriodRatio * float64(secretLifeTime))
-	rotate := time.Now().After(secret.ExpireTime.Add(-gracePeriod))
-	cacheLog.Debugf("Secret %s: lifetime: %v, graceperiod: %v, expiration: %v, should rotate: %v",
+	rotate := time.Now().After(secret.CreatedTime.Add(time.Second * 30))
+	cacheLog.Infof("gggggggkkkkjjjjjjjjssss")
+	cacheLog.Infof("Ratio:%s, secretLifeTime: %s, secret.CreatedTime: %s", sc.configOptions.SecretRotationGracePeriodRatio, secretLifeTime, secret.CreatedTime)
+	cacheLog.Infof("Secret %s: lifetime: %v, graceperiod: %v, expiration: %v, should rotate: %v",
 		secret.ResourceName, secretLifeTime, gracePeriod, secret.ExpireTime, rotate)
 	return rotate
 }
@@ -930,7 +941,10 @@ func (sc *SecretCache) shouldRotate(secret *security.SecretItem) bool {
 func (sc *SecretCache) isTokenExpired(secret *security.SecretItem) bool {
 	// skip check if the token passed from envoy is always valid (ex, normal k8s sa JWT).
 	if sc.configOptions.AlwaysValidTokenFlag {
+		sc.configOptions.AlwaysValidTokenFlag = false
 		return false
+	} else {
+		return true
 	}
 
 	expired, err := util.IsJwtExpired(secret.Token, time.Now())
@@ -1044,7 +1058,7 @@ func (sc *SecretCache) getExchangedToken(ctx context.Context, k8sJwtToken string
 }
 
 func (sc *SecretCache) certExists() error {
-	_, err := tls.LoadX509KeyPair(sc.secOpts.ProvCert+"/cert-chain.pem", sc.secOpts.ProvCert+"/key.pem")
+	_, err := tls.LoadX509KeyPair(provCertPath+"/cert-chain.pem", provCertPath+"/key.pem")
 	if err != nil {
 		return fmt.Errorf("cannot load key pair: %s", err)
 	}
