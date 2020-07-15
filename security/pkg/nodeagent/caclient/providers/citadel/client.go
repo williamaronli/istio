@@ -46,6 +46,12 @@ var (
 	// with extra SAN (labels, etc) in data path.
 	ProvCert = env.RegisterStringVar("PROV_CERT", "",
 		"Set to a directory containing provisioned certs, for VMs").Get()
+
+	// ProvCert is the environment controlling the use of pre-provisioned certs, for VMs.
+	// May also be used in K8S to use a Secret to bootstrap (as a 'refresh key'), but use short-lived tokens
+	// with extra SAN (labels, etc) in data path.
+	ProvCertPath = env.RegisterStringVar("PROV_CERT_PATH", "",
+		"Set to a directory containing provisioned certs, for VMs").Get()
 )
 
 type citadelClient struct {
@@ -131,9 +137,9 @@ func (c *citadelClient) getTLSDialOption() (grpc.DialOption, error) {
 	config := tls.Config{
 		Certificates: []tls.Certificate{certificate},
 		GetClientCertificate: func(*tls.CertificateRequestInfo) (*tls.Certificate, error) {
-			if ProvCert != "" {
+			if ProvCertPath != "" {
 				// Load the certificate from disk
-				certificate, err = tls.LoadX509KeyPair(ProvCert+"/cert-chain.pem", ProvCert+"/key.pem")
+				certificate, err = tls.LoadX509KeyPair(ProvCertPath+"/cert-chain.pem", ProvCertPath+"/key.pem")
 				if err != nil {
 					// we will return an empty cert so that when user sets the Prov cert path
 					// but not have such cert in the file path we use the token to provide verification

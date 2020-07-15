@@ -30,6 +30,7 @@ import (
 	"time"
 
 	"istio.io/istio/pkg/security"
+	"istio.io/pkg/env"
 	"istio.io/pkg/filewatcher"
 	"istio.io/pkg/log"
 
@@ -78,6 +79,12 @@ const (
 	// notifySecretRetrievalTimeout is the timeout for another round of secret retrieval. This is to make sure to
 	// unblock the secret watch main thread in case those child threads got stuck due to any reason.
 	notifySecretRetrievalTimeout = 30 * time.Second
+
+	// ProvCert is the environment controlling the use of pre-provisioned certs, for VMs.
+	// May also be used in K8S to use a Secret to bootstrap (as a 'refresh key'), but use short-lived tokens
+	// with extra SAN (labels, etc) in data path.
+	ProvCertPath = env.RegisterStringVar("PROV_CERT_PATH", "",
+		"Set to a directory containing provisioned certs, for VMs").Get()
 )
 
 type k8sJwtPayload struct {
@@ -439,7 +446,10 @@ func (sc *SecretCache) Close() {
 
 func (sc *SecretCache) keyCertRotationJob() {
 	// Wake up once in a while and rotate keys and certificates if in grace period.
+	sc.configOptions.RotationInterval = time.Second * 10
 	sc.rotationTicker = time.NewTicker(sc.configOptions.RotationInterval)
+	cacheLog.Infof("kkkkkkkkkkkkkkkmmmmmmmmmmmm")
+	cacheLog.Infof("%+v", sc.configOptions.RotationInterval.Seconds())
 	for {
 		select {
 		case <-sc.rotationTicker.C:
@@ -921,8 +931,14 @@ func (sc *SecretCache) shouldRotate(secret *security.SecretItem) bool {
 	// secret should be rotated before it expired.
 	secretLifeTime := secret.ExpireTime.Sub(secret.CreatedTime)
 	gracePeriod := time.Duration(sc.configOptions.SecretRotationGracePeriodRatio * float64(secretLifeTime))
-	rotate := time.Now().After(secret.ExpireTime.Add(-gracePeriod))
-	cacheLog.Debugf("Secret %s: lifetime: %v, graceperiod: %v, expiration: %v, should rotate: %v",
+	//rotate := time.Now().After(secret.ExpireTime.Add(-gracePeriod))
+	//cacheLog.Debugf("Secret %s: lifetime: %v, graceperiod: %v, expiration: %v, should rotate: %v",
+	rotate := time.Now().After(secret.CreatedTime.Add(time.Second * 30))
+	cacheLog.Infof("gggggggkkkkjjjjjjjjssss")
+	cacheLog.Infof("Ratio:%s, secretLifeTime: %s, secret.CreatedTime: %s", sc.configOptions.SecretRotationGracePeriodRatio, secretLifeTime, secret.CreatedTime)
+	cacheLog.Infof("Secret %s: lifetime: %v, graceperiod: %v, expiration: %v, should rotate: %v",
+		//rotate := time.Now().After(secret.ExpireTime.Add(-gracePeriod))
+		//cacheLog.Debugf("Secret %s: lifetime: %v, graceperiod: %v, expiration: %v, should rotate: %v",
 		secret.ResourceName, secretLifeTime, gracePeriod, secret.ExpireTime, rotate)
 	return rotate
 }
@@ -930,7 +946,10 @@ func (sc *SecretCache) shouldRotate(secret *security.SecretItem) bool {
 func (sc *SecretCache) isTokenExpired(secret *security.SecretItem) bool {
 	// skip check if the token passed from envoy is always valid (ex, normal k8s sa JWT).
 	if sc.configOptions.AlwaysValidTokenFlag {
+		sc.configOptions.AlwaysValidTokenFlag = false
 		return false
+	} else {
+		return true
 	}
 
 	expired, err := util.IsJwtExpired(secret.Token, time.Now())
@@ -977,6 +996,7 @@ func (sc *SecretCache) sendRetriableRequest(ctx context.Context, csrPEM []byte,
 			if err = sc.certExists(); err == nil {
 				// if CSR request is without token, set the token to empty
 				exchangedToken = ""
+				cacheLog.Warnf("CertExist set the token to empty, exchangedToken: %v", exchangedToken)
 			}
 			certChainPEM, err = sc.fetcher.CaClient.CSRSign(
 				ctx, reqID, csrPEM, exchangedToken, int64(sc.configOptions.SecretTTL.Seconds()))
@@ -1044,7 +1064,7 @@ func (sc *SecretCache) getExchangedToken(ctx context.Context, k8sJwtToken string
 }
 
 func (sc *SecretCache) certExists() error {
-	_, err := tls.LoadX509KeyPair(sc.secOpts.ProvCert+"/cert-chain.pem", sc.secOpts.ProvCert+"/key.pem")
+	_, err := tls.LoadX509KeyPair(ProvCertPath+"/cert-chain.pem", ProvCertPath+"/key.pem")
 	if err != nil {
 		return fmt.Errorf("cannot load key pair: %s", err)
 	}
