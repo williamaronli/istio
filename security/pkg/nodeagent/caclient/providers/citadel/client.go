@@ -160,7 +160,7 @@ func (c *citadelClient) getTLSDialOption(isRotate bool) (grpc.DialOption, error)
 					// Load the certificate from disk
 					certificate, err = tls.LoadX509KeyPair(OutputKeyCertToDir+"/cert-chain.pem", OutputKeyCertToDir+"/key.pem")
 					if err != nil {
-						return &certificate, nil
+						return nil, fmt.Errorf("failed to load cert")
 					}
 				}
 				return &certificate, nil
@@ -173,7 +173,7 @@ func (c *citadelClient) getTLSDialOption(isRotate bool) (grpc.DialOption, error)
 				citadelClientLog.Infof("123123123131%+v", certificate)
 				if err != nil {
 					citadelClientLog.Infof("jjjjjjjjjjjjjjj")
-					return &certificate, nil
+					return nil, fmt.Errorf("failed to load cert")
 				}
 			}
 			return &certificate, nil
