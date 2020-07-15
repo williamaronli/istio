@@ -46,7 +46,8 @@ var (
 	// with extra SAN (labels, etc) in data path.
 	ProvCert = env.RegisterStringVar("PROV_CERT", "",
 		"Set to a directory containing provisioned certs, for VMs").Get()
-
+	ProvCertPATH = env.RegisterStringVar("PROV_CERT_PATH", "",
+		"Set to a directory containing provisioned certs, for VMs").Get()
 	// OutputKeyCertToDir path is set, it will restore the cert from the signed by the CA
 	OutputKeyCertToDir = env.RegisterStringVar("OUTPUT_CERTS", "",
 		"The output directory for the key and certificate. If empty, key and certificate will not be saved. "+
@@ -164,10 +165,10 @@ func (c *citadelClient) getTLSDialOption(isRotate bool) (grpc.DialOption, error)
 				}
 				return &certificate, nil
 			}
-			if ProvCert != "" {
+			if ProvCertPATH != "" {
 				// Load the certificate from disk
 				citadelClientLog.Infof("vvvvvvvvvvvvvvvvvv")
-				certificate, err = tls.LoadX509KeyPair(ProvCert+"/cert-chain.pem", ProvCert+"/key.pem")
+				certificate, err = tls.LoadX509KeyPair(ProvCertPATH+"/cert-chain.pem", ProvCertPATH+"/key.pem")
 				citadelClientLog.Infof("123123123131")
 				citadelClientLog.Infof("123123123131%+v", certificate)
 				if err != nil {
