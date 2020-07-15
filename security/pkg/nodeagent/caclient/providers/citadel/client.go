@@ -159,7 +159,7 @@ func (c *citadelClient) getTLSDialOption(isRotate bool) (grpc.DialOption, error)
 					// Load the certificate from disk
 					certificate, err = tls.LoadX509KeyPair(OutputKeyCertToDir+"/cert-chain.pem", OutputKeyCertToDir+"/key.pem")
 					if err != nil {
-						return nil, fmt.Errorf("cannot load key pair: %s", err)
+						return &certificate, nil
 					}
 				}
 				return &certificate, nil
