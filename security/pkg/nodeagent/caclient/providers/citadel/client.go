@@ -131,7 +131,11 @@ func (c *citadelClient) getTLSDialOption() (grpc.DialOption, error) {
 				// Load the certificate from disk
 				certificate, err = tls.LoadX509KeyPair(ProvCertPath+"/cert-chain.pem", ProvCertPath+"/key.pem")
 				if err != nil {
-					return nil, fmt.Errorf("cannot load key pair: %s", err)
+					// we will return an empty cert so that when user sets the Prov cert path
+					// but not have such cert in the file path we use the token to provide verification
+					// instead of just breaking the workflow
+					citadelClientLog.Warnf("failed to load cert, using token instead")
+					return &certificate, nil
 				}
 			}
 			return &certificate, nil
