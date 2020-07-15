@@ -18,6 +18,7 @@ package cache
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -581,7 +582,7 @@ func (sc *SecretCache) rotate(updateRootFlag bool) {
 		}
 
 		// Re-generate secret if it's expired.
-		if sc.shouldRotate(&secret) {
+		if sc.secOpts.ProvCert == "" && sc.shouldRotate(&secret) {
 			atomic.AddUint64(&sc.secretChangedCount, 1)
 			// Send the notification to close the stream if token is expired, so that client could re-connect with a new token.
 			if sc.isTokenExpired(&secret) {
@@ -968,6 +969,13 @@ func (sc *SecretCache) sendRetriableRequest(ctx context.Context, csrPEM []byte,
 		var httpRespCode int
 		if isCSR {
 			requestErrorString = fmt.Sprintf("%s CSR", logPrefix)
+			// if cert exists in the file path user provides,
+			// we will use cert instead of the token to do CSR Sign request
+
+			if err = sc.certExists(); err != nil {
+				// if CSR request is without token, set the token to empty
+				exchangedToken = ""
+			}
 			certChainPEM, err = sc.fetcher.CaClient.CSRSign(
 				ctx, reqID, csrPEM, exchangedToken, int64(sc.configOptions.SecretTTL.Seconds()))
 		} else {
@@ -1031,4 +1039,12 @@ func (sc *SecretCache) getExchangedToken(ctx context.Context, k8sJwtToken string
 	}
 	cacheLog.Debugf("Token exchange succeeded for %s", logPrefix)
 	return exchangedTokens[0], nil
+}
+
+func (sc *SecretCache) certExists() error {
+	_, err := tls.LoadX509KeyPair(sc.secOpts.ProvCert+"/cert-chain.pem", sc.secOpts.ProvCert+"/key.pem")
+	if err != nil {
+		return fmt.Errorf("cannot load key pair: %s", err)
+	}
+	return nil
 }
