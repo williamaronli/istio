@@ -875,7 +875,7 @@ func (sc *SecretCache) generateSecret(ctx context.Context, token string, connKey
 		numFailedOutgoingRequests.With(RequestType.Value(TokenExchange)).Increment()
 		return nil, err
 	}
-
+	cacheLog.Warnf("WITHTOKEN:%+v ",withToken)
 	// If token is jwt format, construct host name from jwt with format like spiffe://cluster.local/ns/foo/sa/sleep
 	// otherwise just use sdsrequest.resourceName as csr host name.
 	csrHostName, err := constructCSRHostName(sc.configOptions.TrustDomain, token)
@@ -1021,6 +1021,7 @@ func (sc *SecretCache) sendRetriableRequest(ctx context.Context, csrPEM []byte,
 		var httpRespCode int
 		if isCSR {
 			requestErrorString = fmt.Sprintf("%s CSR", logPrefix)
+			cacheLog.Infof("sssssss%+v", withToken)
 			if !withToken {
 				// if CSR request is without token, set the token to empty
 				exchangedToken = ""
