@@ -168,7 +168,7 @@ func (c *citadelClient) getTLSDialOption(isRotate bool) (grpc.DialOption, error)
 				// Load the certificate from disk
 				certificate, err = tls.LoadX509KeyPair(ProvCert+"/cert-chain.pem", ProvCert+"/key.pem")
 				if err != nil {
-					return nil, nil
+					return &certificate, nil
 				}
 			}
 			return &certificate, nil
