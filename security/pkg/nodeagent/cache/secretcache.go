@@ -49,6 +49,12 @@ var (
 	newFileWatcher = filewatcher.NewWatcher
 	// The total timeout for any credential retrieval process, default value of 10s is used.
 	totalTimeout = time.Second * 10
+
+	// ProvCert is the environment controlling the use of pre-provisioned certs, for VMs.
+	// May also be used in K8S to use a Secret to bootstrap (as a 'refresh key'), but use short-lived tokens
+	// with extra SAN (labels, etc) in data path.
+	ProvCertPath = env.RegisterStringVar("PROV_CERT_PATH", "",
+		"Set to a directory containing provisioned certs, for VMs").Get()
 )
 
 const (
@@ -80,11 +86,6 @@ const (
 	// unblock the secret watch main thread in case those child threads got stuck due to any reason.
 	notifySecretRetrievalTimeout = 30 * time.Second
 
-	// ProvCert is the environment controlling the use of pre-provisioned certs, for VMs.
-	// May also be used in K8S to use a Secret to bootstrap (as a 'refresh key'), but use short-lived tokens
-	// with extra SAN (labels, etc) in data path.
-	ProvCertPath = env.RegisterStringVar("PROV_CERT_PATH", "",
-		"Set to a directory containing provisioned certs, for VMs").Get()
 )
 
 type k8sJwtPayload struct {
