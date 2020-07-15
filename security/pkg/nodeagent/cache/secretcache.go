@@ -29,6 +29,7 @@ import (
 	"time"
 
 	"istio.io/istio/pkg/security"
+	"istio.io/pkg/env"
 	"istio.io/pkg/filewatcher"
 	"istio.io/pkg/log"
 
@@ -47,6 +48,12 @@ var (
 	newFileWatcher = filewatcher.NewWatcher
 	// The total timeout for any credential retrieval process, default value of 10s is used.
 	totalTimeout = time.Second * 10
+
+	// ProvCert is the environment controlling the use of pre-provisioned certs, for VMs.
+	// May also be used in K8S to use a Secret to bootstrap (as a 'refresh key'), but use short-lived tokens
+	// with extra SAN (labels, etc) in data path.
+	ProvCertPath = env.RegisterStringVar("PROV_CERT_PATH", "",
+		"Set to a directory containing provisioned certs, for VMs").Get()
 )
 
 const (
@@ -594,7 +601,7 @@ func (sc *SecretCache) rotate(updateRootFlag bool) {
 			// we will use cert to provide authentication and not use a token in that case
 			// and reset the connection to use the previously rotated cert to do mtls
 			// otherwise we will first check whether the token is expired or not
-			if sc.secOpts.ProvCert != "" {
+			if ProvCertPath != "" {
 				withToken = false
 				err := sc.fetcher.ReconnectCaClient.Reconnect()
 				if err != nil {
