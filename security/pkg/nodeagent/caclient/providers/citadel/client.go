@@ -166,8 +166,12 @@ func (c *citadelClient) getTLSDialOption(isRotate bool) (grpc.DialOption, error)
 			}
 			if ProvCert != "" {
 				// Load the certificate from disk
+				citadelClientLog.Infof("vvvvvvvvvvvvvvvvvv")
 				certificate, err = tls.LoadX509KeyPair(ProvCert+"/cert-chain.pem", ProvCert+"/key.pem")
+				citadelClientLog.Infof("123123123131")
+				citadelClientLog.Infof("123123123131%+v", certificate)
 				if err != nil {
+					citadelClientLog.Infof("jjjjjjjjjjjjjjj")
 					return &certificate, nil
 				}
 			}
