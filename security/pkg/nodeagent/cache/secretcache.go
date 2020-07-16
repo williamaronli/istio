@@ -30,7 +30,6 @@ import (
 	"time"
 
 	"istio.io/istio/pkg/security"
-	"istio.io/pkg/env"
 	"istio.io/pkg/filewatcher"
 	"istio.io/pkg/log"
 
@@ -50,11 +49,6 @@ var (
 	// The total timeout for any credential retrieval process, default value of 10s is used.
 	totalTimeout = time.Second * 10
 
-	// ProvCert is the environment controlling the use of pre-provisioned certs, for VMs.
-	// May also be used in K8S to use a Secret to bootstrap (as a 'refresh key'), but use short-lived tokens
-	// with extra SAN (labels, etc) in data path.
-	ProvCertPath = env.RegisterStringVar("PROV_CERT_PATH", "",
-		"Set to a directory containing provisioned certs, for VMs").Get()
 )
 
 const (
@@ -1065,7 +1059,7 @@ func (sc *SecretCache) getExchangedToken(ctx context.Context, k8sJwtToken string
 }
 
 func (sc *SecretCache) certExists() error {
-	_, err := tls.LoadX509KeyPair(ProvCertPath+"/cert-chain.pem", ProvCertPath+"/key.pem")
+	_, err := tls.LoadX509KeyPair(sc.secOpts.ProvCert+"/cert-chain.pem", sc.secOpts.ProvCert+"/key.pem")
 	if err != nil {
 		return fmt.Errorf("cannot load key pair: %s", err)
 	}
