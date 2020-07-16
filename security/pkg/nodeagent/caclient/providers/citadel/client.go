@@ -98,11 +98,11 @@ func (c *citadelClient) CSRSign(ctx context.Context, reqID string, csrPEM []byte
 	} else {
 		citadelClientLog.Infof("pppppppppp")
 		citadelClientLog.Infof("token is : %+v", token)
-		err := c.reconnect()
-		if err != nil {
-			citadelClientLog.Errorf("Failed to Reconnect: %v", err)
-			return nil, err
-		}
+		//err := c.reconnect()
+		//if err != nil {
+		//	citadelClientLog.Errorf("Failed to Reconnect: %v", err)
+		//	return nil, err
+		//}
 	}
 
 	resp, err := c.client.CreateCertificate(ctx, req)
