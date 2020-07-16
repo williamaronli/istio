@@ -71,7 +71,9 @@ func NewCitadelClient(endpoint string, tls bool, rootCert []byte, clusterID stri
 		caTLSRootCert: rootCert,
 		clusterID:     clusterID,
 	}
-
+	citadelClientLog.Infof("kkkkssssssssss")
+	citadelClientLog.Infof("%+v", ProvCert)
+	citadelClientLog.Infof("kkkkssssssssss")
 	conn, err := c.buildConnection()
 	if err != nil {
 		citadelClientLog.Errorf("Failed to connect to endpoint %s: %v", endpoint, err)
