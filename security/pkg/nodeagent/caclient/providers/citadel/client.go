@@ -91,9 +91,13 @@ func (c *citadelClient) CSRSign(ctx context.Context, reqID string, csrPEM []byte
 	}
 	if token != "" {
 		// add Bearer prefix, which is required by Citadel.
+		citadelClientLog.Infof("mmmmmmmmmm")
+		citadelClientLog.Infof("token is : %+v", token)
 		token = bearerTokenPrefix + token
 		ctx = metadata.NewOutgoingContext(ctx, metadata.Pairs("Authorization", token, "ClusterID", c.clusterID))
 	} else {
+		citadelClientLog.Infof("pppppppppp")
+		citadelClientLog.Infof("token is : %+v", token)
 		err := c.reconnect()
 		if err != nil {
 			citadelClientLog.Errorf("Failed to Reconnect: %v", err)
