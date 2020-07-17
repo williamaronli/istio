@@ -147,7 +147,7 @@ func (ca *mockTokenCAServer) CreateCertificate(ctx context.Context, in *pb.Istio
 	}
 	//tokenReview.Spec.Audiences = []string{tokenreview.DefaultAudience}
 	tokenReview.Status.Audiences = []string{}
-	tokenReview.Status.Authenticated = true
+	tokenReview.Status.Authenticated = false
 	tokenReview.Status.User = k8sauth.UserInfo{
 		Username: "system:serviceaccount:default:example-pod-sa",
 		Groups:   []string{"system:serviceaccounts"},
