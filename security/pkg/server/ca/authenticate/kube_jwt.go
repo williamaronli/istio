@@ -80,6 +80,9 @@ func (a *KubeJWTAuthenticator) Authenticate(ctx context.Context) (*Caller, error
 	if kubeClient == nil {
 		return nil, fmt.Errorf("could not get cluster %s's kube client", clusterID)
 	}
+	fmt.Printf("kubeClient: %+v\n", kubeClient)
+	fmt.Printf("targetJWT: %+v\n", targetJWT)
+	fmt.Printf("a.jwtPolicy: %+v\n", a.jwtPolicy)
 	id, err = tokenreview.ValidateK8sJwt(kubeClient, targetJWT, a.jwtPolicy)
 	if err != nil {
 		return nil, fmt.Errorf("failed to validate the JWT: %v", err)
