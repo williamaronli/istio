@@ -145,7 +145,7 @@ func (ca *mockTokenCAServer) CreateCertificate(ctx context.Context, in *pb.Istio
 			Token: validToken,
 		},
 	}
-	tokenReview.Spec.Audiences = []string{tokenreview.DefaultAudience}
+	//tokenReview.Spec.Audiences = []string{tokenreview.DefaultAudience}
 	tokenReview.Status.Audiences = []string{}
 	tokenReview.Status.Authenticated = true
 	tokenReview.Status.User = k8sauth.UserInfo{
