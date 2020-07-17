@@ -150,12 +150,10 @@ func (ca *mockTokenCAServer) CreateCertificate(ctx context.Context, in *pb.Istio
 		Groups:   []string{"system:serviceaccounts"},
 	}
 	remoteKubeClientGetter := func(clusterID string) kubernetes.Interface {
-		if clusterID == remoteCluster {
 			client := fake.NewSimpleClientset()
 				client.PrependReactor("create", "tokenreviews", func(action ktesting.Action) (bool, runtime.Object, error) {
 					return true, tokenReview, nil
 				})
-		}
 		return nil
 	}
 	authenticator := authenticate.NewKubeJWTAuthenticator(client, "Kubernetes", remoteKubeClientGetter, "example.com", jwt.PolicyFirstParty)
