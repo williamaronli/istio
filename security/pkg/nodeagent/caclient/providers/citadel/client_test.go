@@ -25,14 +25,9 @@ import (
 	"google.golang.org/grpc"
 	"istio.io/istio/pkg/jwt"
 	"k8s.io/apimachinery/pkg/runtime"
-	//"k8s.io/client-go/kubernetes"
 	ktesting "k8s.io/client-go/testing"
 
-	//"istio.io/istio/security/pkg/k8s/tokenreview"
 	k8sauth "k8s.io/api/authentication/v1"
-	//"k8s.io/apimachinery/pkg/runtime"
-	//"k8s.io/client-go/kubernetes"
-	//ktesting "k8s.io/client-go/testing"
 
 	pb "istio.io/istio/security/proto"
 	"istio.io/istio/security/pkg/server/ca/authenticate"
@@ -128,9 +123,6 @@ type mockTokenCAServer struct {
 }
 
 func (ca *mockTokenCAServer) CreateCertificate(ctx context.Context, in *pb.IstioCertificateRequest) (*pb.IstioCertificateResponse, error) {
-	fmt.Printf("SSSSSSSSSSSS-=======\n")
-	fmt.Printf("SSSSSSSSSSSS-=======\n")
-	fmt.Printf("SSSSSSSSSSSS-=======\n")
 	client := fake.NewSimpleClientset()
 	tokenReview := &k8sauth.TokenReview{
 		Spec: k8sauth.TokenReviewSpec{
@@ -148,19 +140,6 @@ func (ca *mockTokenCAServer) CreateCertificate(ctx context.Context, in *pb.Istio
 	})
 	authenticator := authenticate.NewKubeJWTAuthenticator(client, "Kubernetes", nil, "example.com", jwt.PolicyFirstParty)
 	_, err := authenticator.Authenticate(ctx)
-	//u, err
-	//if len(tc.expectedErrMsg) > 0 {
-	//	if err == nil {
-	//		//t.Errorf("Case %s: Succeeded. Error expected: %v", id, err)
-	//	} else if err.Error() != tc.expectedErrMsg {
-	//		t.Errorf("Case %s: Incorrect error message: \n%s\nVS\n%s",
-	//			id, err.Error(), tc.expectedErrMsg)
-	//	}
-	//	return
-	//} else if err != nil {
-	//	t.Errorf("Case %s: Unexpected Error: %v", id, err)
-	//	return
-	//}
 	if err == nil {
 		return &pb.IstioCertificateResponse{CertChain: ca.Certs}, nil
 	}
@@ -219,13 +198,7 @@ func TestCitadelClientWithDifferentTypeToken(t *testing.T) {
 			t.Errorf("Test case [%s]: failed to create ca client: %v", id, err)
 		}
 
-		t.Logf("id : %+v", id)
-		if id == "Valid Token"{
-			t.Logf("ValidTokenStart1111111\n")
-		}
 		resp, err := cli.CSRSign(context.Background(), "12345678-1234-1234-1234-123456789012", []byte{01}, tc.token, 1)
-
-		t.Logf("resp: %+v, err: %+v", resp, err)
 		if err != nil {
 			if err.Error() != tc.expectedErr {
 				t.Errorf("Test case [%s]: error (%s) does not match expected error (%s)", id, err.Error(), tc.expectedErr)
