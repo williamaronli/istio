@@ -128,18 +128,6 @@ type mockTokenCAServer struct {
 }
 
 func (ca *mockTokenCAServer) CreateCertificate(ctx context.Context, in *pb.IstioCertificateRequest) (*pb.IstioCertificateResponse, error) {
-
-	//token: "bearer-token",
-	//	metadata: metadata.MD{
-	//	"clusterid": []string{primaryCluster},
-	//	"authorization": []string{
-	//		"Basic callername",
-	//	},
-	//},
-	//jwtPolicy:      jwt.PolicyFirstParty,
-	//		expectedID:     fmt.Sprintf(identityTemplate, "example.com", "default", "example-pod-sa"),
-	//		expectedErrMsg: "",
-
 	fmt.Printf("SSSSSSSSSSSS-=======\n")
 	fmt.Printf("SSSSSSSSSSSS-=======\n")
 	fmt.Printf("SSSSSSSSSSSS-=======\n")
@@ -149,7 +137,6 @@ func (ca *mockTokenCAServer) CreateCertificate(ctx context.Context, in *pb.Istio
 			Token: validToken,
 		},
 	}
-	//tokenReview.Spec.Audiences = []string{tokenreview.DefaultAudience}
 	tokenReview.Status.Audiences = []string{}
 	tokenReview.Status.Authenticated = true
 	tokenReview.Status.User = k8sauth.UserInfo{
@@ -159,16 +146,7 @@ func (ca *mockTokenCAServer) CreateCertificate(ctx context.Context, in *pb.Istio
 	client.PrependReactor("create", "tokenreviews", func(action ktesting.Action) (bool, runtime.Object, error) {
 		return true, tokenReview, nil
 	})
-	//remoteKubeClientGetter := func(clusterID string) kubernetes.Interface {
-	//		client := fake.NewSimpleClientset()
-	//			client.PrependReactor("create", "tokenreviews", func(action ktesting.Action) (bool, runtime.Object, error) {
-	//				return true, tokenReview, nil
-	//			})
-	//		return client
-	//}
 	authenticator := authenticate.NewKubeJWTAuthenticator(client, "Kubernetes", nil, "example.com", jwt.PolicyFirstParty)
-	fmt.Printf("testssssssstoken authenticatedkkkkkkkkkk\n")
-	fmt.Printf("%+v\n", ctx)
 	_, err := authenticator.Authenticate(ctx)
 	//u, err
 	//if len(tc.expectedErrMsg) > 0 {
@@ -200,7 +178,7 @@ func TestCitadelClientWithDifferentTypeToken(t *testing.T) {
 		"Valid Token": {
 			server:       mockTokenCAServer{Certs: fakeCert, Err: nil},
 			expectedCert: fakeCert,
-			expectedErr:  "",
+			expectedErr:  nil,
 			token: validToken,
 		},
 		"Empty Token": {
@@ -247,5 +225,11 @@ func TestCitadelClientWithDifferentTypeToken(t *testing.T) {
 		}
 		resp, err := cli.CSRSign(context.Background(), "12345678-1234-1234-1234-123456789012", []byte{01}, tc.token, 1)
 		t.Logf("resp: %+v, err: %+v", resp, err)
+		if tc.expectedErr != "" {
+
+		} else {
+			//tc.er
+		}
+
 	}
 }
