@@ -225,11 +225,11 @@ func TestCitadelClientWithDifferentTypeToken(t *testing.T) {
 		}
 		resp, err := cli.CSRSign(context.Background(), "12345678-1234-1234-1234-123456789012", []byte{01}, tc.token, 1)
 		t.Logf("resp: %+v, err: %+v", resp, err)
-		if tc.expectedErr != "" {
-
-		} else {
-			//tc.er
-		}
+		//if tc.expectedErr != "" {
+		//
+		//} else {
+		//	//tc.er
+		//}
 
 	}
 }
