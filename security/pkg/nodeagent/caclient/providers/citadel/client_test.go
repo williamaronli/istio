@@ -159,7 +159,7 @@ func TestCitadelClientWithDifferentTypeToken(t *testing.T) {
 			server:       mockTokenCAServer{Certs: fakeCert, Err: nil},
 			expectedCert: fakeCert,
 			expectedErr:  "",
-			token:        validToken,
+			token:        fakeToken,
 		},
 		"Empty Token": {
 			server:       mockTokenCAServer{Certs: nil, Err: fmt.Errorf("test failure")},
