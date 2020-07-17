@@ -235,6 +235,9 @@ func TestCitadelClientWithDifferentTypeToken(t *testing.T) {
 		}
 
 		t.Logf("id : %+v", id)
+		if id == "Valid Token"{
+			t.Logf("ValidTokenStart1111111\n")
+		}
 		resp, err := cli.CSRSign(context.Background(), "12345678-1234-1234-1234-123456789012", []byte{01}, tc.token, 1)
 		t.Logf("resp: %+v, err: %+v", resp, err)
 	}
