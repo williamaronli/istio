@@ -24,7 +24,7 @@ import (
 
 	"google.golang.org/grpc"
 	"istio.io/istio/pkg/jwt"
-	"istio.io/istio/security/pkg/k8s/tokenreview"
+	//"istio.io/istio/security/pkg/k8s/tokenreview"
 	k8sauth "k8s.io/api/authentication/v1"
 	//"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
