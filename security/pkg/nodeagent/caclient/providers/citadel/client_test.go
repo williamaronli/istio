@@ -24,6 +24,7 @@ import (
 
 	"google.golang.org/grpc"
 	"istio.io/istio/pkg/jwt"
+	"istio.io/istio/security/pkg/k8s/tokenreview"
 	k8sauth "k8s.io/api/authentication/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -144,6 +145,7 @@ func (ca *mockTokenCAServer) CreateCertificate(ctx context.Context, in *pb.Istio
 			Token: validToken,
 		},
 	}
+	tokenReview.Spec.Audiences = []string{tokenreview.DefaultAudience}
 	tokenReview.Status.Audiences = []string{}
 	tokenReview.Status.Authenticated = true
 	tokenReview.Status.User = k8sauth.UserInfo{
@@ -151,10 +153,10 @@ func (ca *mockTokenCAServer) CreateCertificate(ctx context.Context, in *pb.Istio
 		Groups:   []string{"system:serviceaccounts"},
 	}
 	remoteKubeClientGetter := func(clusterID string) kubernetes.Interface {
-			client := fake.NewSimpleClientset()
-				client.PrependReactor("create", "tokenreviews", func(action ktesting.Action) (bool, runtime.Object, error) {
-					return true, tokenReview, nil
-				})
+			//client := fake.NewSimpleClientset()
+			//	client.PrependReactor("create", "tokenreviews", func(action ktesting.Action) (bool, runtime.Object, error) {
+			//		return true, tokenReview, nil
+			//	})
 		return nil
 	}
 	authenticator := authenticate.NewKubeJWTAuthenticator(client, "Kubernetes", remoteKubeClientGetter, "example.com", jwt.PolicyFirstParty)
