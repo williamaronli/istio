@@ -177,11 +177,13 @@ func TestAuthenticate(t *testing.T) {
 			}
 
 			authenticator := NewKubeJWTAuthenticator(client, "Kubernetes", remoteKubeClientGetter, "example.com", tc.jwtPolicy)
+
+			actualCaller, err := authenticator.Authenticate(ctx)
 			if id == "token authenticated" {
 				t.Logf("ssssssstoken authenticatedkkkkkkkkkk\n")
 				t.Logf("%+v\n", ctx)
+				t.Logf("err: %+v\n", err)
 			}
-			actualCaller, err := authenticator.Authenticate(ctx)
 			if len(tc.expectedErrMsg) > 0 {
 				if err == nil {
 					t.Errorf("Case %s: Succeeded. Error expected: %v", id, err)
