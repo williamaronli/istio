@@ -49,6 +49,8 @@ func ValidateK8sJwt(kubeClient kubernetes.Interface, targetToken, jwtPolicy stri
 	} else if jwtPolicy != jwt.PolicyFirstParty {
 		return nil, fmt.Errorf("invalid JWT policy: %v", jwtPolicy)
 	}
+	fmt.Printf("sssssssssssValidateK8sJwt\n")
+	fmt.Printf("targetToken: %+v\n", targetToken)
 	fmt.Printf("tokenReview: %+v\n", tokenReview)
 	reviewRes, err := kubeClient.AuthenticationV1().TokenReviews().Create(context.TODO(), tokenReview, metav1.CreateOptions{})
 	fmt.Printf("sssssssssssValidateK8sJwt\n")
