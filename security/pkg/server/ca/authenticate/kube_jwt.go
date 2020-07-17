@@ -148,5 +148,3 @@ func extractClusterID(ctx context.Context) string {
 	}
 	return ""
 }
-
-
