@@ -24,6 +24,10 @@ import (
 
 	"google.golang.org/grpc"
 	"istio.io/istio/pkg/jwt"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes"
+	ktesting "k8s.io/client-go/testing"
+
 	//"istio.io/istio/security/pkg/k8s/tokenreview"
 	k8sauth "k8s.io/api/authentication/v1"
 	//"k8s.io/apimachinery/pkg/runtime"
@@ -147,19 +151,19 @@ func (ca *mockTokenCAServer) CreateCertificate(ctx context.Context, in *pb.Istio
 	}
 	//tokenReview.Spec.Audiences = []string{tokenreview.DefaultAudience}
 	tokenReview.Status.Audiences = []string{}
-	tokenReview.Status.Authenticated = false
+	tokenReview.Status.Authenticated = true
 	tokenReview.Status.User = k8sauth.UserInfo{
 		Username: "system:serviceaccount:default:example-pod-sa",
 		Groups:   []string{"system:serviceaccounts"},
 	}
-	//remoteKubeClientGetter := func(clusterID string) kubernetes.Interface {
-	//		//client := fake.NewSimpleClientset()
-	//		//	client.PrependReactor("create", "tokenreviews", func(action ktesting.Action) (bool, runtime.Object, error) {
-	//		//		return true, tokenReview, nil
-	//		//	})
-	//	return nil
-	//}
-	authenticator := authenticate.NewKubeJWTAuthenticator(client, "Kubernetes", nil, "example.com", jwt.PolicyFirstParty)
+	remoteKubeClientGetter := func(clusterID string) kubernetes.Interface {
+			client := fake.NewSimpleClientset()
+				client.PrependReactor("create", "tokenreviews", func(action ktesting.Action) (bool, runtime.Object, error) {
+					return true, tokenReview, nil
+				})
+			return client
+	}
+	authenticator := authenticate.NewKubeJWTAuthenticator(client, "Kubernetes", remoteKubeClientGetter, "example.com", jwt.PolicyFirstParty)
 	fmt.Printf("testssssssstoken authenticatedkkkkkkkkkk\n")
 	fmt.Printf("%+v\n", ctx)
 	_, err := authenticator.Authenticate(ctx)
