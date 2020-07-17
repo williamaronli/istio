@@ -160,6 +160,8 @@ func (ca *mockTokenCAServer) CreateCertificate(ctx context.Context, in *pb.Istio
 		return nil
 	}
 	authenticator := authenticate.NewKubeJWTAuthenticator(client, "Kubernetes", remoteKubeClientGetter, "example.com", jwt.PolicyFirstParty)
+	fmt.Printf("testssssssstoken authenticatedkkkkkkkkkk\n")
+	fmt.Printf("%+v\n", ctx)
 	_, err := authenticator.Authenticate(ctx)
 	//u, err
 	//if len(tc.expectedErrMsg) > 0 {
