@@ -101,11 +101,12 @@ func (a *KubeJWTAuthenticator) Authenticate(ctx context.Context) (*Caller, error
 }
 
 func (a *KubeJWTAuthenticator) GetKubeClient(clusterID string) kubernetes.Interface {
+	fmt.Printf("pppppppppp\n")
 	// first match local/primary cluster
 	if a.clusterID == clusterID {
 		return a.kubeClient
 	}
-	fmt.Printf("GetKubeClientlllllllllll")
+	fmt.Printf("GetKubeClientlllllllllll\n")
 	// secondly try other remote clusters
 	if a.remoteKubeClientGetter != nil {
 		if res := a.remoteKubeClientGetter(clusterID); res != nil {
