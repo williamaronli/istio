@@ -23,8 +23,16 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"istio.io/istio/pkg/jwt"
+	k8sauth "k8s.io/api/authentication/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes"
+	ktesting "k8s.io/client-go/testing"
 
 	pb "istio.io/istio/security/proto"
+	"istio.io/istio/security/pkg/server/ca/authenticate"
+
+	"k8s.io/client-go/kubernetes/fake"
 )
 
 const mockServerAddress = "localhost:0"
@@ -32,6 +40,7 @@ const mockServerAddress = "localhost:0"
 var (
 	fakeCert  = []string{"foo", "bar"}
 	fakeToken = "Bearer fakeToken"
+	validToken = "Bearer validToken"
 )
 
 type mockCAServer struct {
@@ -105,5 +114,124 @@ func TestCitadelClient(t *testing.T) {
 				t.Errorf("Test case [%s]: resp: got %+v, expected %v", id, resp, tc.expectedCert)
 			}
 		}
+	}
+}
+
+type mockTokenCAServer struct {
+	Certs []string
+	Err   error
+}
+
+func (ca *mockTokenCAServer) CreateCertificate(ctx context.Context, in *pb.IstioCertificateRequest) (*pb.IstioCertificateResponse, error) {
+
+	//token: "bearer-token",
+	//	metadata: metadata.MD{
+	//	"clusterid": []string{primaryCluster},
+	//	"authorization": []string{
+	//		"Basic callername",
+	//	},
+	//},
+	//jwtPolicy:      jwt.PolicyFirstParty,
+	//		expectedID:     fmt.Sprintf(identityTemplate, "example.com", "default", "example-pod-sa"),
+	//		expectedErrMsg: "",
+
+
+	client := fake.NewSimpleClientset()
+	remoteCluster := "remote"
+	tokenReview := &k8sauth.TokenReview{
+		Spec: k8sauth.TokenReviewSpec{
+			Token: validToken,
+		},
+	}
+	tokenReview.Status.Audiences = []string{}
+	tokenReview.Status.Authenticated = true
+	tokenReview.Status.User = k8sauth.UserInfo{
+		Username: "system:serviceaccount:default:example-pod-sa",
+		Groups:   []string{"system:serviceaccounts"},
+	}
+	remoteKubeClientGetter := func(clusterID string) kubernetes.Interface {
+		if clusterID == remoteCluster {
+			client := fake.NewSimpleClientset()
+				client.PrependReactor("create", "tokenreviews", func(action ktesting.Action) (bool, runtime.Object, error) {
+					return true, tokenReview, nil
+				})
+		}
+		return nil
+	}
+	authenticator := authenticate.NewKubeJWTAuthenticator(client, "Kubernetes", remoteKubeClientGetter, "example.com", jwt.PolicyFirstParty)
+	_, err := authenticator.Authenticate(ctx)
+	//u, err
+	//if len(tc.expectedErrMsg) > 0 {
+	//	if err == nil {
+	//		//t.Errorf("Case %s: Succeeded. Error expected: %v", id, err)
+	//	} else if err.Error() != tc.expectedErrMsg {
+	//		t.Errorf("Case %s: Incorrect error message: \n%s\nVS\n%s",
+	//			id, err.Error(), tc.expectedErrMsg)
+	//	}
+	//	return
+	//} else if err != nil {
+	//	t.Errorf("Case %s: Unexpected Error: %v", id, err)
+	//	return
+	//}
+	if err == nil {
+		return &pb.IstioCertificateResponse{CertChain: ca.Certs}, nil
+	}
+
+	return nil, err
+}
+
+func TestCitadelClientWithDifferentTypeToken(t *testing.T) {
+	testCases := map[string]struct {
+		server       mockTokenCAServer
+		expectedCert []string
+		expectedErr  string
+		token string
+	}{
+		"Valid Token": {
+			server:       mockTokenCAServer{Certs: fakeCert, Err: nil},
+			expectedCert: fakeCert,
+			expectedErr:  "",
+			token: validToken,
+		},
+		"Empty Token": {
+			server:       mockTokenCAServer{Certs: nil, Err: fmt.Errorf("test failure")},
+			expectedCert: nil,
+			expectedErr:  "rpc error: code = Unknown desc = test failure",
+			token: "",
+		},
+		"inValid Token": {
+			server:       mockTokenCAServer{Certs: []string{}, Err: nil},
+			expectedCert: nil,
+			expectedErr:  "invalid response cert chain",
+			token: fakeToken,
+		},
+	}
+
+	for id, tc := range testCases {
+		// create a local grpc server
+		s := grpc.NewServer()
+		defer s.Stop()
+		lis, err := net.Listen("tcp", mockServerAddress)
+		if err != nil {
+			t.Fatalf("Test case [%s]: failed to listen: %v", id, err)
+		}
+
+		go func() {
+			pb.RegisterIstioCertificateServiceServer(s, &tc.server)
+			if err := s.Serve(lis); err != nil {
+				t.Logf("Test case [%s]: failed to serve: %v", id, err)
+			}
+		}()
+
+		// The goroutine starting the server may not be ready, results in flakiness.
+		time.Sleep(1 * time.Second)
+
+		cli, err := NewCitadelClient(lis.Addr().String(), false, nil, "")
+		if err != nil {
+			t.Errorf("Test case [%s]: failed to create ca client: %v", id, err)
+		}
+
+		resp, err := cli.CSRSign(context.Background(), "12345678-1234-1234-1234-123456789012", []byte{01}, tc.token, 1)
+		t.Logf("resp: %+v, err: %+v", resp, err)
 	}
 }
