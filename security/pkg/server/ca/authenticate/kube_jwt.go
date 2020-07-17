@@ -109,6 +109,7 @@ func (a *KubeJWTAuthenticator) GetKubeClient(clusterID string) kubernetes.Interf
 	// secondly try other remote clusters
 	if a.remoteKubeClientGetter != nil {
 		if res := a.remoteKubeClientGetter(clusterID); res != nil {
+			fmt.Printf("responsehere========")
 			return res
 		}
 	}
