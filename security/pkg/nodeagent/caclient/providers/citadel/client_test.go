@@ -137,7 +137,6 @@ func (ca *mockTokenCAServer) CreateCertificate(ctx context.Context, in *pb.Istio
 
 
 	client := fake.NewSimpleClientset()
-	remoteCluster := "remote"
 	tokenReview := &k8sauth.TokenReview{
 		Spec: k8sauth.TokenReviewSpec{
 			Token: validToken,
