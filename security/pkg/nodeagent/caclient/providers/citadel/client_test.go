@@ -178,7 +178,7 @@ func TestCitadelClientWithDifferentTypeToken(t *testing.T) {
 		"Valid Token": {
 			server:       mockTokenCAServer{Certs: fakeCert, Err: nil},
 			expectedCert: fakeCert,
-			expectedErr:  nil,
+			expectedErr:  "",
 			token: validToken,
 		},
 		"Empty Token": {
@@ -226,5 +226,11 @@ func TestCitadelClientWithDifferentTypeToken(t *testing.T) {
 		resp, err := cli.CSRSign(context.Background(), "12345678-1234-1234-1234-123456789012", []byte{01}, tc.token, 1)
 
 		t.Logf("resp: %+v, err: %+v", resp, err)
+		if tc.expectedErr != "" {
+
+		} else {
+
+		}
+
 	}
 }
