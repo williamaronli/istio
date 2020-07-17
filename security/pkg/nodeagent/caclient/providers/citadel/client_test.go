@@ -41,7 +41,7 @@ const mockServerAddress = "localhost:0"
 var (
 	fakeCert  = []string{"foo", "bar"}
 	fakeToken = "Bearer fakeToken"
-	validToken = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjdyWTN1bGdTOHpCQ1lscHNpQlJsalBWNVJFaFc2M0VTcHdtWVdnOTY2UDQifQ.eyJhdWQiOlsiaXN0aW8tY2EiXSwiZXhwIjoxNTk0OTk1MDY0LCJpYXQiOjE1OTQ5NTE4NjQsImlzcyI6Imt1YmVybmV0ZXMuZGVmYXVsdC5zdmMiLCJrdWJlcm5ldGVzLmlvIjp7Im5hbWVzcGFjZSI6InRlc3RpbmciLCJwb2QiOnsibmFtZSI6Imh0dHBiaW4tNWQ1ZmNmOWZmZi13NzZuMiIsInVpZCI6ImVmMDVjOGNlLWY1OTMtNDBhYS04MTFmLTk4Mjg5ODYzODBjYyJ9LCJzZXJ2aWNlYWNjb3VudCI6eyJuYW1lIjoiaHR0cGJpbiIsInVpZCI6IjZkZTcyNjVlLTZiNDktNGZlNC1hZjc5LTdmNjdmYjA1ZTQ5NyJ9fSwibmJmIjoxNTk0OTUxODY0LCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6dGVzdGluZzpodHRwYmluIn0.ADxhSLZM4KX0f9CLIeIGwllbTPMbwVDKMuvoVT7PSZHqmnl0aTr23bXmranf75HtRbuQwck7z-0KMFmAIG9xr9ZetNVN7kVgHlNkf2O2ozCvc91t2LWJktO91CsMO2cN0drJ3db-GOFDpjgQd5PQKRo5zkfEK4vpfQ-Z9nyq_X0s5dhGobDw1YD9NO72CuV0buX2hr0mPwngq81K_vX3-6qkrQzmkRMjPAjvtxwrTUgAnWCNyjwuhyydALpK3qQiVLzelhpIYDI7OUK2JNzQrzrqBOkHYoFb3edJiTS_Hmsf9I4FyPapt0W-TlgTj8jLFl9Q3h4EfjS23IYUqGOcOg"
+	validToken = "bearer-token"
 )
 
 type mockCAServer struct {
@@ -233,6 +233,7 @@ func TestCitadelClientWithDifferentTypeToken(t *testing.T) {
 		if err != nil {
 			t.Errorf("Test case [%s]: failed to create ca client: %v", id, err)
 		}
+
 		t.Logf("id : %+v", id)
 		resp, err := cli.CSRSign(context.Background(), "12345678-1234-1234-1234-123456789012", []byte{01}, tc.token, 1)
 		t.Logf("resp: %+v, err: %+v", resp, err)
