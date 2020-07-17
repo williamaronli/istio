@@ -135,7 +135,9 @@ func (ca *mockTokenCAServer) CreateCertificate(ctx context.Context, in *pb.Istio
 	//		expectedID:     fmt.Sprintf(identityTemplate, "example.com", "default", "example-pod-sa"),
 	//		expectedErrMsg: "",
 
-	fmt.Printf("SSSSSSSSSSSS-=======")
+	fmt.Printf("SSSSSSSSSSSS-=======\n")
+	fmt.Printf("SSSSSSSSSSSS-=======\n")
+	fmt.Printf("SSSSSSSSSSSS-=======\n")
 	client := fake.NewSimpleClientset()
 	tokenReview := &k8sauth.TokenReview{
 		Spec: k8sauth.TokenReviewSpec{
