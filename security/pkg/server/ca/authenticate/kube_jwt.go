@@ -74,6 +74,7 @@ func (a *KubeJWTAuthenticator) Authenticate(ctx context.Context) (*Caller, error
 		return nil, fmt.Errorf("target JWT extraction error: %v", err)
 	}
 	clusterID := extractClusterID(ctx)
+	fmt.Printf("clusterID: %+v\n", clusterID)
 	var id []string
 
 	kubeClient := a.GetKubeClient(clusterID)
