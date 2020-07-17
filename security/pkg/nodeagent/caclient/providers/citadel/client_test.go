@@ -184,7 +184,7 @@ func TestCitadelClientWithDifferentTypeToken(t *testing.T) {
 		"Empty Token": {
 			server:       mockTokenCAServer{Certs: nil, Err: fmt.Errorf("test failure")},
 			expectedCert: nil,
-			expectedErr:  "rpc error: code = Unknown desc = test failure",
+			expectedErr:  "err: rpc error: code = Unknown desc = target JWT extraction error: no HTTP authorization header exists",
 			token: "",
 		},
 		"inValid Token": {
@@ -226,11 +226,16 @@ func TestCitadelClientWithDifferentTypeToken(t *testing.T) {
 		resp, err := cli.CSRSign(context.Background(), "12345678-1234-1234-1234-123456789012", []byte{01}, tc.token, 1)
 
 		t.Logf("resp: %+v, err: %+v", resp, err)
-		if tc.expectedErr != "" {
-
+		if err != nil {
+			if err.Error() != tc.expectedErr {
+				t.Errorf("Test case [%s]: error (%s) does not match expected error (%s)", id, err.Error(), tc.expectedErr)
+			}
 		} else {
-
+			if tc.expectedErr != "" {
+				t.Errorf("Test case [%s]: expect error: %s but got no error", id, tc.expectedErr)
+			} else if !reflect.DeepEqual(resp, tc.expectedCert) {
+				t.Errorf("Test case [%s]: resp: got %+v, expected %v", id, resp, tc.expectedCert)
+			}
 		}
-
 	}
 }
