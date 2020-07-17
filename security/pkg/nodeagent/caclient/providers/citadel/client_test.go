@@ -152,13 +152,13 @@ func (ca *mockTokenCAServer) CreateCertificate(ctx context.Context, in *pb.Istio
 		Username: "system:serviceaccount:default:example-pod-sa",
 		Groups:   []string{"system:serviceaccounts"},
 	}
-	remoteKubeClientGetter := func(clusterID string) kubernetes.Interface {
-			//client := fake.NewSimpleClientset()
-			//	client.PrependReactor("create", "tokenreviews", func(action ktesting.Action) (bool, runtime.Object, error) {
-			//		return true, tokenReview, nil
-			//	})
-		return nil
-	}
+	//remoteKubeClientGetter := func(clusterID string) kubernetes.Interface {
+	//		//client := fake.NewSimpleClientset()
+	//		//	client.PrependReactor("create", "tokenreviews", func(action ktesting.Action) (bool, runtime.Object, error) {
+	//		//		return true, tokenReview, nil
+	//		//	})
+	//	return nil
+	//}
 	authenticator := authenticate.NewKubeJWTAuthenticator(client, "Kubernetes", nil, "example.com", jwt.PolicyFirstParty)
 	fmt.Printf("testssssssstoken authenticatedkkkkkkkkkk\n")
 	fmt.Printf("%+v\n", ctx)
