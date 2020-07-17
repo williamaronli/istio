@@ -184,7 +184,7 @@ func TestCitadelClientWithDifferentTypeToken(t *testing.T) {
 		"Empty Token": {
 			server:       mockTokenCAServer{Certs: nil, Err: fmt.Errorf("test failure")},
 			expectedCert: nil,
-			expectedErr:  "err: rpc error: code = Unknown desc = target JWT extraction error: no HTTP authorization header exists",
+			expectedErr:  "rpc error: code = Unknown desc = target JWT extraction error: no HTTP authorization header exists",
 			token: "",
 		},
 		"inValid Token": {
