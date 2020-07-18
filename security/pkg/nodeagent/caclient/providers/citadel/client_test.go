@@ -152,6 +152,8 @@ func extractBearerToken(ctx context.Context) (string, error) {
 	return "", fmt.Errorf("no bearer token exists in HTTP authorization header")
 }
 
+// this test is to test whether the server side receive the correct token when
+// we build the CSR sign request
 func TestCitadelClientWithDifferentTypeToken(t *testing.T) {
 	testCases := map[string]struct {
 		server       mockTokenCAServer
