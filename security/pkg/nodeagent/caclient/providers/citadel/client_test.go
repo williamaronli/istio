@@ -186,7 +186,7 @@ func TestCitadelClientWithDifferentTypeToken(t *testing.T) {
 				defer s.Stop()
 				lis, err := net.Listen("tcp", mockServerAddress)
 				if err != nil {
-					t.Fatal("test case [%s]: failed to listen: %v", id, err)
+					t.Fatalf("test case [%s]: failed to listen: %v", id, err)
 				}
 				go func() {
 					pb.RegisterIstioCertificateServiceServer(s, &tc.server)
@@ -215,7 +215,7 @@ func TestCitadelClientWithDifferentTypeToken(t *testing.T) {
 					return nil
 				}, retry.Timeout(20*time.Second), retry.Delay(2*time.Second) )
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("test failed error is： %+v", err)
 				}
 		})
 	}
