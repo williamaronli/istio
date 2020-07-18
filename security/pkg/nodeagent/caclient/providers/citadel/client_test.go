@@ -25,7 +25,6 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
-	"istio.io/istio/pkg/security"
 
 	"istio.io/istio/pkg/test/util/retry"
 
