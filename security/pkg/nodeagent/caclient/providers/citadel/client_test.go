@@ -26,15 +26,12 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"istio.io/istio/pkg/test/util/retry"
-	util "istio.io/istio/tests/integration/mixer"
-	"istio.io/istio/tests/integration/telemetry/tracing"
 
 	pb "istio.io/istio/security/proto"
 )
 
 const (
 	mockServerAddress = "localhost:0"
-	retryTimes = 3
 )
 
 
