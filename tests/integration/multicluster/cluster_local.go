@@ -28,9 +28,9 @@ import (
 
 // ClusterLocalTest tests that traffic works within a local cluster while in a multicluster configuration
 // clusterLocalNS have been configured in meshConfig.serviceSettings to be clusterLocal.
-func ClusterLocalTest(t *testing.T, clusterLocalNS namespace.Instance, feature features.Feature) {
+func ClusterLocalTest(t *testing.T, clusterLocalNS namespace.Instance, features ...features.Feature) {
 	framework.NewTest(t).
-		Features(feature).
+		Features(features...).
 		Run(func(ctx framework.TestContext) {
 			ctx.NewSubTest("respect-cluster-local-config").Run(func(ctx framework.TestContext) {
 				clusters := ctx.Environment().Clusters()
@@ -44,7 +44,7 @@ func ClusterLocalTest(t *testing.T, clusterLocalNS namespace.Instance, feature f
 							// Deploy src only in local, but dst in all clusters. dst in remote clusters shouldn't be hit
 							srcName, dstName := fmt.Sprintf("src-%d", i), fmt.Sprintf("dst-%d", i)
 							var src, dst echo.Instance
-							builder := echoboot.NewBuilderOrFail(ctx, ctx).
+							builder := echoboot.NewBuilder(ctx).
 								With(&src, newEchoConfig(srcName, clusterLocalNS, local)).
 								With(&dst, newEchoConfig(dstName, clusterLocalNS, local))
 							for j, remoteCluster := range clusters {

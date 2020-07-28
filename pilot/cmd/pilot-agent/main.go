@@ -41,7 +41,6 @@ import (
 	"istio.io/istio/pilot/cmd/pilot-agent/status"
 	"istio.io/istio/pilot/pkg/features"
 	"istio.io/istio/pilot/pkg/model"
-	securityutil "istio.io/istio/pilot/pkg/security/authn/utils"
 	securityModel "istio.io/istio/pilot/pkg/security/model"
 	"istio.io/istio/pilot/pkg/serviceregistry"
 	"istio.io/istio/pilot/pkg/util/network"
@@ -72,7 +71,6 @@ var (
 	proxyIP            string
 	registryID         serviceregistry.ProviderID
 	trustDomain        string
-	mixerIdentity      string
 	stsPort            int
 	tokenManagerPlugin string
 
@@ -91,7 +89,6 @@ var (
 	instanceIPVar        = env.RegisterStringVar("INSTANCE_IP", "", "")
 	podNameVar           = env.RegisterStringVar("POD_NAME", "", "")
 	podNamespaceVar      = env.RegisterStringVar("POD_NAMESPACE", "", "")
-	istioNamespaceVar    = env.RegisterStringVar("ISTIO_NAMESPACE", "", "")
 	kubeAppProberNameVar = env.RegisterStringVar(status.KubeAppProberEnvName, "", "")
 	clusterIDVar         = env.RegisterStringVar("ISTIO_META_CLUSTER_ID", "", "")
 
@@ -143,6 +140,7 @@ var (
 		"Whether to generate PKCS#8 private keys").Get()
 	eccSigAlgEnv        = env.RegisterStringVar("ECC_SIGNATURE_ALGORITHM", "", "The type of ECC signature algorithm to use when generating private keys").Get()
 	fileMountedCertsEnv = env.RegisterBoolVar("FILE_MOUNTED_CERTS", false, "").Get()
+	useTokenForCSREnv   = env.RegisterBoolVar("USE_TOKEN_FOR_CSR", false, "CSR requires a token").Get()
 
 	rootCmd = &cobra.Command{
 		Use:          "pilot-agent",
@@ -218,8 +216,6 @@ var (
 			if len(role.ID) == 0 {
 				if registryID == serviceregistry.Kubernetes {
 					role.ID = podName + "." + podNamespace
-				} else if registryID == serviceregistry.Consul {
-					role.ID = role.IPAddresses[0] + ".service.consul"
 				} else {
 					role.ID = role.IPAddresses[0]
 				}
@@ -259,6 +255,7 @@ var (
 				ClusterID:          clusterIDVar.Get(),
 				FileMountedCerts:   fileMountedCertsEnv,
 				CAEndpoint:         caEndpointEnv,
+				UseTokenForCSR:     useTokenForCSREnv,
 			}
 			secOpts.PluginNames = strings.Split(pluginNamesEnv, ",")
 
@@ -288,16 +285,13 @@ var (
 			sa := istio_agent.NewAgent(&proxyConfig,
 				&istio_agent.AgentConfig{}, secOpts)
 
-			var pilotSAN, mixerSAN []string
+			var pilotSAN []string
 			if proxyConfig.ControlPlaneAuthPolicy == meshconfig.AuthenticationPolicy_MUTUAL_TLS {
 				setSpiffeTrustDomain(podNamespace, role.DNSDomain)
-				// Obtain the Mixer SAN, which uses SPIFFE certs. Used below to create a Envoy proxy.
-				mixerSAN = getSAN(getControlPlaneNamespace(podNamespace, proxyConfig.DiscoveryAddress), securityutil.MixerSvcAccName, mixerIdentity)
 				// Obtain Pilot SAN, using DNS.
 				pilotSAN = []string{getPilotSan(proxyConfig.DiscoveryAddress)}
 			}
 			log.Infof("PilotSAN %#v", pilotSAN)
-			log.Infof("MixerSAN %#v", mixerSAN)
 
 			// Start in process SDS.
 			_, err = sa.Start(role.Type == model.SidecarProxy, podNamespaceVar.Get())
@@ -378,7 +372,6 @@ var (
 				LogLevel:            proxyLogLevel,
 				ComponentLogLevel:   proxyComponentLogLevel,
 				PilotSubjectAltName: pilotSAN,
-				MixerSubjectAltName: mixerSAN,
 				NodeIPs:             role.IPAddresses,
 				PodName:             podName,
 				PodNamespace:        podNamespace,
@@ -411,7 +404,7 @@ var (
 	}
 )
 
-// explicitly set the trustdomain so the pilot and mixer SAN will have same trustdomain
+// explicitly set the trustdomain so the pilot SAN will have same trustdomain
 // and the initialization of the spiffe pkg isn't linked to generating pilot's SAN first
 func setSpiffeTrustDomain(podNamespace string, domain string) {
 	pilotTrustDomain := trustDomain
@@ -419,9 +412,6 @@ func setSpiffeTrustDomain(podNamespace string, domain string) {
 		if registryID == serviceregistry.Kubernetes &&
 			(domain == podNamespace+".svc."+constants.DefaultKubernetesDomain || domain == "") {
 			pilotTrustDomain = constants.DefaultKubernetesDomain
-		} else if registryID == serviceregistry.Consul &&
-			(domain == "service.consul" || domain == "") {
-			pilotTrustDomain = ""
 		} else {
 			pilotTrustDomain = domain
 		}
@@ -429,23 +419,10 @@ func setSpiffeTrustDomain(podNamespace string, domain string) {
 	spiffe.SetTrustDomain(pilotTrustDomain)
 }
 
-func getSAN(ns string, defaultSA string, overrideIdentity string) []string {
-	var san []string
-	if overrideIdentity == "" {
-		san = append(san, securityutil.GetSAN(ns, defaultSA))
-	} else {
-		san = append(san, securityutil.GetSAN("", overrideIdentity))
-
-	}
-	return san
-}
-
 func getDNSDomain(podNamespace, domain string) string {
 	if len(domain) == 0 {
 		if registryID == serviceregistry.Kubernetes {
 			domain = podNamespace + ".svc." + constants.DefaultKubernetesDomain
-		} else if registryID == serviceregistry.Consul {
-			domain = "service.consul"
 		} else {
 			domain = ""
 		}
@@ -456,8 +433,8 @@ func getDNSDomain(podNamespace, domain string) string {
 func init() {
 	proxyCmd.PersistentFlags().StringVar((*string)(&registryID), "serviceregistry",
 		string(serviceregistry.Kubernetes),
-		fmt.Sprintf("Select the platform for service registry, options are {%s, %s, %s}",
-			serviceregistry.Kubernetes, serviceregistry.Consul, serviceregistry.Mock))
+		fmt.Sprintf("Select the platform for service registry, options are {%s, %s}",
+			serviceregistry.Kubernetes, serviceregistry.Mock))
 	proxyCmd.PersistentFlags().StringVar(&proxyIP, "ip", "",
 		"Proxy IP address. If not provided uses ${INSTANCE_IP} environment variable.")
 	proxyCmd.PersistentFlags().StringVar(&role.ID, "id", "",
@@ -466,8 +443,6 @@ func init() {
 		"DNS domain suffix. If not provided uses ${POD_NAMESPACE}.svc.cluster.local")
 	proxyCmd.PersistentFlags().StringVar(&trustDomain, "trust-domain", "",
 		"The domain to use for identities")
-	proxyCmd.PersistentFlags().StringVar(&mixerIdentity, "mixerIdentity", "",
-		"The identity used as the suffix for mixer's spiffe SAN. This would only be used by pilot all other proxy would get this value from pilot")
 
 	proxyCmd.PersistentFlags().StringVar(&meshConfigFile, "meshConfig", "./etc/istio/config/mesh",
 		"File name for Istio mesh configuration. If not specified, a default mesh will be used. This may be overridden by "+

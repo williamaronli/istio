@@ -29,15 +29,15 @@ import (
 
 // TelemetryTest validates that source and destination labels are collected
 // for multicluster traffic.
-func TelemetryTest(t *testing.T, ns namespace.Instance, feature features.Feature) {
+func TelemetryTest(t *testing.T, ns namespace.Instance, features ...features.Feature) {
 	framework.NewTest(t).
 		Label(label.Multicluster).
-		Features(feature).
+		Features(features...).
 		Run(func(ctx framework.TestContext) {
 			ctx.NewSubTest("telemetry").
 				Run(func(ctx framework.TestContext) {
 					clusters := ctx.Environment().Clusters()
-					builder := echoboot.NewBuilderOrFail(ctx, ctx)
+					builder := echoboot.NewBuilder(ctx)
 					for _, cluster := range clusters {
 						svcName := fmt.Sprintf("echo-%d", cluster.Index())
 						builder = builder.With(nil, newEchoConfig(svcName, ns, cluster))

@@ -58,18 +58,6 @@ func TestOptions(t *testing.T) {
 			expected: `[{"exact":"fake"},{"exact":"other"}]`,
 		},
 		{
-			testName: "mixerSAN",
-			key:      "MixerSubjectAltName",
-			option:   option.MixerSubjectAltName([]string{"fake"}),
-			expected: "fake",
-		},
-		{
-			testName: "mixerSAN empty",
-			key:      "MixerSubjectAltName",
-			option:   option.MixerSubjectAltName(make([]string, 0)),
-			expected: nil,
-		},
-		{
 			testName: "nil connect timeout",
 			key:      "connect_timeout",
 			option:   option.ConnectTimeout(nil),
@@ -708,7 +696,7 @@ func TestOptions(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.testName, func(t *testing.T) {
-			g := NewGomegaWithT(t)
+			g := NewWithT(t)
 
 			params, err := option.NewTemplateParams(c.option)
 			if c.expectError {

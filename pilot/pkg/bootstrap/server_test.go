@@ -86,7 +86,7 @@ func TestReloadIstiodCert(t *testing.T) {
 		t.Fatalf("WriteFile(%v) failed: %v", tlsOptions.KeyFile, err)
 	}
 
-	g := NewGomegaWithT(t)
+	g := NewWithT(t)
 
 	// Validate that istiod cert is updated.
 	g.Eventually(func() bool {
@@ -148,12 +148,12 @@ func TestNewServer(t *testing.T) {
 					FileDir: configDir,
 				}
 
-				// Include all of the default plugins for integration with Mixer, etc.
+				// Include all of the default plugins
 				p.Plugins = DefaultPlugins
 				p.ShutdownDuration = 1 * time.Millisecond
 			})
 
-			g := NewGomegaWithT(t)
+			g := NewWithT(t)
 			s, err := NewServer(args)
 			g.Expect(err).To(Succeed())
 

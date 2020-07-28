@@ -46,7 +46,7 @@ import (
 const (
 	// Minimum K8 version required to run latest version of Istio
 	// https://istio.io/docs/setup/platform-setup/
-	minK8SVersion = "1.16"
+	minK8SVersion = "1.17"
 )
 
 var (
@@ -435,7 +435,7 @@ func NewPrecheckCommand() *cobra.Command {
 func findIstios(client dynamic.Interface) ([]istioInstall, error) {
 	retval := make([]istioInstall, 0)
 
-	// First, look for IstioOperator CRs left by 'istioctl manifest apply' or 'kubectl apply'
+	// First, look for IstioOperator CRs left by 'istioctl install' or 'kubectl apply'
 	iops, err := allOperatorsInCluster(client)
 	if err != nil {
 		return retval, err

@@ -81,7 +81,6 @@ var (
 		plugin.Authn,
 		plugin.Authz,
 		plugin.Health,
-		plugin.Mixer,
 	}
 )
 
@@ -413,8 +412,8 @@ func (s *Server) initKubeClient(args *PilotArgs) error {
 		var err error
 		// Used by validation
 		s.kubeRestConfig, err = kubelib.DefaultRestConfig(args.RegistryOptions.KubeConfig, "", func(config *rest.Config) {
-			config.QPS = 20
-			config.Burst = 40
+			config.QPS = args.RegistryOptions.KubeOptions.KubernetesAPIQPS
+			config.Burst = args.RegistryOptions.KubeOptions.KubernetesAPIBurst
 		})
 		if err != nil {
 			return fmt.Errorf("failed creating kube config: %v", err)
@@ -746,7 +745,7 @@ func (s *Server) initRegistryEventHandlers() error {
 	}
 
 	instanceHandler := func(si *model.ServiceInstance, _ model.Event) {
-		// TODO: This is an incomplete code. This code path is called for consul, etc.
+		// TODO: This is an incomplete code. This code path is called for legacy MCP, etc.
 		// In all cases, this is simply an instance update and not a config update. So, we need to update
 		// EDS in all proxies, and do a full config push for the instance that just changed (add/update only).
 		s.EnvoyXdsServer.ConfigUpdate(&model.PushRequest{

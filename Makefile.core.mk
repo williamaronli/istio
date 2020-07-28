@@ -22,20 +22,14 @@ SHELL := /bin/bash -o pipefail
 VERSION ?= 1.8-dev
 
 # Base version of Istio image to use
-BASE_VERSION ?= 1.7-dev.4
+BASE_VERSION ?= 1.8-dev.0
 
 export GO111MODULE ?= on
 export GOPROXY ?= https://proxy.golang.org
 export GOSUMDB ?= sum.golang.org
 
-ISTIO_CNI_HUB ?= gcr.io/istio-testing
-export ISTIO_CNI_HUB
-ISTIO_CNI_TAG ?= latest
-export ISTIO_CNI_TAG
-
 # cumulatively track the directories/files to delete after a clean
 DIRS_TO_CLEAN:=
-FILES_TO_CLEAN:=
 
 # If GOPATH is not set by the env, set it to a sane value
 GOPATH ?= $(shell cd ${ISTIO_GO}/../../..; pwd)
@@ -275,12 +269,8 @@ buildcache:
 BINARIES:=./istioctl/cmd/istioctl \
   ./pilot/cmd/pilot-discovery \
   ./pilot/cmd/pilot-agent \
-  ./mixer/cmd/mixs \
-  ./mixer/cmd/mixc \
-  ./mixer/tools/mixgen \
   ./pkg/test/echo/cmd/client \
   ./pkg/test/echo/cmd/server \
-  ./mixer/test/policybackend \
   ./operator/cmd/operator \
   ./cni/cmd/istio-cni \
   ./cni/cmd/istio-cni-repair \
@@ -288,7 +278,7 @@ BINARIES:=./istioctl/cmd/istioctl \
   ./tools/istio-iptables
 
 # List of binaries included in releases
-RELEASE_BINARIES:=pilot-discovery pilot-agent mixc mixs mixgen istioctl
+RELEASE_BINARIES:=pilot-discovery pilot-agent istioctl
 
 .PHONY: build
 build: depend ## Builds all go binaries.
@@ -331,13 +321,11 @@ lint-helm-global:
 
 lint: lint-python lint-copyright-banner lint-scripts lint-go lint-dockerfiles lint-markdown lint-yaml lint-licenses lint-helm-global ## Runs all linters.
 	@bin/check_samples.sh
-	@go run mixer/tools/adapterlinter/main.go ./mixer/adapter/...
 	@testlinter
-	@envvarlinter galley istioctl mixer pilot security
+	@envvarlinter galley istioctl pilot security
 
 go-gen:
 	@mkdir -p /tmp/bin
-	@go build -o /tmp/bin/mixgen "${REPO_ROOT}/mixer/tools/mixgen/main.go"
 	@PATH="${PATH}":/tmp/bin go generate ./...
 
 gen-charts:
@@ -437,8 +425,8 @@ ${ISTIO_BIN}/go-junit-report:
 # This is just an alias for racetest now
 test: racetest
 
-TEST_TARGETS ?= ./pilot/... ./istioctl/... ./operator/... ./mixer/... ./galley/... ./security/... ./pkg/... ./tests/common/... ./tools/istio-iptables/... ./cni/cmd/... ./cni/pkg/...
-# For now, keep a minimal subset. This can be expanded in the future, especially after mixer removal, which has some expensive tests that may OOM.
+TEST_TARGETS ?= ./pilot/... ./istioctl/... ./operator/... ./galley/... ./security/... ./pkg/... ./tests/common/... ./tools/istio-iptables/... ./cni/cmd/... ./cni/pkg/...
+# For now, keep a minimal subset. This can be expanded in the future.
 BENCH_TARGETS ?= ./pilot/...
 
 .PHONY: racetest
@@ -463,7 +451,6 @@ cni.install-test: docker.install-cni
 
 clean: ## Cleans all the intermediate files and folders previously generated.
 	rm -rf $(DIRS_TO_CLEAN)
-	rm -f $(FILES_TO_CLEAN)
 
 #-----------------------------------------------------------------------------
 # Target: docker
@@ -474,9 +461,6 @@ clean: ## Cleans all the intermediate files and folders previously generated.
 include tools/istio-docker.mk
 
 push: docker.push ## Build and push docker images to registry defined by $HUB and $TAG
-
-FILES_TO_CLEAN+=install/consul/istio.yaml \
-                samples/bookinfo/platform/consul/bookinfo.sidecars.yaml
 
 #-----------------------------------------------------------------------------
 # Target: environment and tools

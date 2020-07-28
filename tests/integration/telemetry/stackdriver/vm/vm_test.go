@@ -31,7 +31,6 @@ import (
 	"istio.io/istio/pkg/test/framework/components/echo/echoboot"
 	"istio.io/istio/pkg/test/util/retry"
 	"istio.io/istio/pkg/test/util/tmpl"
-	"istio.io/istio/tests/integration/pilot/vm"
 )
 
 func TestVMTelemetry(t *testing.T) {
@@ -71,7 +70,7 @@ spec:
 			}
 
 			// builder to build the instances iteratively
-			echoboot.NewBuilderOrFail(t, ctx).
+			echoboot.NewBuilder(ctx).
 				With(&clt, echo.Config{
 					Service:   "client",
 					Namespace: ns,
@@ -88,13 +87,12 @@ spec:
 				}).
 				BuildOrFail(t)
 
-			echoboot.NewBuilderOrFail(t, ctx).
+			echoboot.NewBuilder(ctx).
 				With(&srv, echo.Config{
 					Service:       "server",
 					Namespace:     ns,
 					Ports:         ports,
 					DeployAsVM:    true,
-					VMImage:       vm.DefaultVMImage,
 					VMEnvironment: vmEnv,
 				}).
 				BuildOrFail(t)

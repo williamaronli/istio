@@ -37,10 +37,6 @@ import (
 	"istio.io/istio/pkg/util/gogoprotomarshal"
 )
 
-const (
-	DefaultSdsUdsPath = "unix:./etc/istio/proxy/SDS"
-)
-
 // DefaultProxyConfig for individual proxies
 func DefaultProxyConfig() meshconfig.ProxyConfig {
 	// TODO: include revision based on REVISION env
@@ -90,15 +86,12 @@ func DefaultMeshConfig() meshconfig.MeshConfig {
 		EnableEnvoyAccessLogService: false,
 		ReportBatchMaxEntries:       100,
 		ReportBatchMaxTime:          types.DurationProto(1 * time.Second),
-		DisableMixerHttpReports:     true,
-		DisablePolicyChecks:         true,
 		ProtocolDetectionTimeout:    types.DurationProto(5 * time.Second),
 		IngressService:              "istio-ingressgateway",
 		IngressControllerMode:       meshconfig.MeshConfig_STRICT,
 		IngressClass:                "istio",
 		TrustDomain:                 "cluster.local",
 		TrustDomainAliases:          []string{},
-		SdsUdsPath:                  DefaultSdsUdsPath,
 		EnableAutoMtls:              &types.BoolValue{Value: true},
 		OutboundTrafficPolicy:       &meshconfig.MeshConfig_OutboundTrafficPolicy{Mode: meshconfig.MeshConfig_OutboundTrafficPolicy_ALLOW_ANY},
 		LocalityLbSetting: &v1alpha3.LocalityLoadBalancerSetting{
@@ -107,21 +100,15 @@ func DefaultMeshConfig() meshconfig.MeshConfig {
 		Certificates:  []*meshconfig.Certificate{},
 		DefaultConfig: &proxyConfig,
 
-		// Not set in the default mesh config - code defaults.
-		MixerCheckServer:                  "",
-		MixerReportServer:                 "",
-		PolicyCheckFailOpen:               false,
-		SidecarToTelemetrySessionAffinity: false,
-		RootNamespace:                     constants.IstioSystemNamespace,
-		ProxyListenPort:                   15001,
-		ConnectTimeout:                    types.DurationProto(10 * time.Second),
-		EnableSdsTokenMount:               false,
-		DefaultServiceExportTo:            []string{"*"},
-		DefaultVirtualServiceExportTo:     []string{"*"},
-		DefaultDestinationRuleExportTo:    []string{"*"},
-		DnsRefreshRate:                    types.DurationProto(5 * time.Second), // 5 seconds is the default refresh rate used in Envoy
-		ThriftConfig:                      &meshconfig.MeshConfig_ThriftConfig{},
-		ServiceSettings:                   make([]*meshconfig.MeshConfig_ServiceSettings, 0),
+		RootNamespace:                  constants.IstioSystemNamespace,
+		ProxyListenPort:                15001,
+		ConnectTimeout:                 types.DurationProto(10 * time.Second),
+		DefaultServiceExportTo:         []string{"*"},
+		DefaultVirtualServiceExportTo:  []string{"*"},
+		DefaultDestinationRuleExportTo: []string{"*"},
+		DnsRefreshRate:                 types.DurationProto(5 * time.Second), // 5 seconds is the default refresh rate used in Envoy
+		ThriftConfig:                   &meshconfig.MeshConfig_ThriftConfig{},
+		ServiceSettings:                make([]*meshconfig.MeshConfig_ServiceSettings, 0),
 	}
 }
 
