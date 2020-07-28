@@ -280,7 +280,9 @@ var (
 			// Disable the secret eviction for istio agent.
 			secOpts.EvictionDuration = 0
 			if citadel.ProvCert != "" {
+				log.Infof("ProvCertPilotAgent")
 				secOpts.AlwaysValidTokenFlag = true
+				log.Infof("%+v",secOpts.AlwaysValidTokenFlag)
 			}
 
 			sa := istio_agent.NewAgent(&proxyConfig,
