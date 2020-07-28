@@ -446,6 +446,8 @@ func (sc *SecretCache) keyCertRotationJob() {
 	cacheLog.Infof("%+v", sc.secOpts.ProvCert)
 	cacheLog.Infof("%+v", sc.secOpts.SecretRotationGracePeriodRatio)
 	cacheLog.Infof("%+v", sc.secOpts.RotationInterval)
+	cacheLog.Infof("%+v", sc.configOptions.RotationInterval)
+	cacheLog.Infof("%+v", sc.configOptions.SecretRotationGracePeriodRatio)
 	sc.rotationTicker = time.NewTicker(sc.configOptions.RotationInterval)
 	for {
 		select {
