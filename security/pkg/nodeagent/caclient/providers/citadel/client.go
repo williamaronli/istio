@@ -98,6 +98,7 @@ func (c *citadelClient) CSRSign(ctx context.Context, reqID string, csrPEM []byte
 	citadelClientLog.Infof("token is: %+v", token)
 	citadelClientLog.Infof("token length is: %+v", len(token))
 	resp, err := c.client.CreateCertificate(ctx, req)
+
 	if err != nil {
 		citadelClientLog.Errorf("Failed to create certificate: %v", err)
 		return nil, err
@@ -107,7 +108,7 @@ func (c *citadelClient) CSRSign(ctx context.Context, reqID string, csrPEM []byte
 		citadelClientLog.Errorf("CertChain length is %d, expected more than 1", len(resp.CertChain))
 		return nil, errors.New("invalid response cert chain")
 	}
-
+	citadelClientLog.Infof("err None")
 	return resp.CertChain, nil
 }
 
