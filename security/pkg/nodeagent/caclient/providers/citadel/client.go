@@ -108,7 +108,9 @@ func (c *citadelClient) CSRSign(ctx context.Context, reqID string, csrPEM []byte
 		citadelClientLog.Errorf("CertChain length is %d, expected more than 1", len(resp.CertChain))
 		return nil, errors.New("invalid response cert chain")
 	}
-	citadelClientLog.Infof("err None")
+	citadelClientLog.Infof("Successfully install")
+	citadelClientLog.Infof("%+v",resp.CertChain)
+	citadelClientLog.Infof("Successfully install")
 	return resp.CertChain, nil
 }
 
