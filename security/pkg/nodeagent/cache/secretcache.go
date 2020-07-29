@@ -322,6 +322,9 @@ func (sc *SecretCache) addFileWatcher(file string, token string, connKey ConnKey
 				for ckey := range connKeys {
 					if _, ok := sc.secrets.Load(ckey); ok {
 						// Regenerate the Secret and trigger the callback that pushes the secrets to proxy.
+						cacheLog.Infof("ssssssssssssaddFileWatcher")
+						cacheLog.Infof("%+v",token)
+						cacheLog.Infof("FileWatcher",token)
 						if _, secret, err := sc.generateFileSecret(ckey, token); err != nil {
 							cacheLog.Errorf("%v: error in generating secret after file change [%s] %v", ckey, file, err)
 						} else {
@@ -772,6 +775,9 @@ func readFileWithTimeout(path string) ([]byte, error) {
 }
 
 func (sc *SecretCache) generateFileSecret(connKey ConnKey, token string) (bool, *security.SecretItem, error) {
+	cacheLog.Infof("ppppppppp")
+	cacheLog.Infof("token: %+v", token)
+	cacheLog.Infof("ppppppppp")
 	resourceName := connKey.ResourceName
 	logPrefix := cacheLogPrefix(resourceName)
 
