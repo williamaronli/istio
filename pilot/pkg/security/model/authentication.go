@@ -16,6 +16,7 @@ package model
 
 import (
 	"sync"
+	"time"
 
 	auth "github.com/envoyproxy/go-control-plane/envoy/api/v2/auth"
 	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
@@ -109,6 +110,55 @@ func ConstructSdsSecretConfigWithCustomUds(name, sdsUdsPath string) *auth.SdsSec
 	}
 }
 
+<<<<<<< HEAD
+=======
+// Preconfigured SDS configs to avoid excessive memory allocations
+var (
+	// set the fetch timeout to 0 here in defaultV3SDSConfig and rootV3SDSConfig
+	// because workload certs are guaranteed exist.
+	defaultV3SDSConfig = &tls.SdsSecretConfig{
+		Name: SDSDefaultResourceName,
+		SdsConfig: &core.ConfigSource{
+			ConfigSourceSpecifier: &core.ConfigSource_ApiConfigSource{
+				ApiConfigSource: &core.ApiConfigSource{
+					ApiType:             core.ApiConfigSource_GRPC,
+					TransportApiVersion: core.ApiVersion_V3,
+					GrpcServices: []*core.GrpcService{
+						{
+							TargetSpecifier: &core.GrpcService_EnvoyGrpc_{
+								EnvoyGrpc: &core.GrpcService_EnvoyGrpc{ClusterName: SDSClusterName},
+							},
+						},
+					},
+				},
+			},
+			ResourceApiVersion:  core.ApiVersion_V3,
+			InitialFetchTimeout: ptypes.DurationProto(time.Second * 0),
+		},
+	}
+	rootV3SDSConfig = &tls.SdsSecretConfig{
+		Name: SDSRootResourceName,
+		SdsConfig: &core.ConfigSource{
+			ConfigSourceSpecifier: &core.ConfigSource_ApiConfigSource{
+				ApiConfigSource: &core.ApiConfigSource{
+					ApiType:             core.ApiConfigSource_GRPC,
+					TransportApiVersion: core.ApiVersion_V3,
+					GrpcServices: []*core.GrpcService{
+						{
+							TargetSpecifier: &core.GrpcService_EnvoyGrpc_{
+								EnvoyGrpc: &core.GrpcService_EnvoyGrpc{ClusterName: SDSClusterName},
+							},
+						},
+					},
+				},
+			},
+			ResourceApiVersion:  core.ApiVersion_V3,
+			InitialFetchTimeout: ptypes.DurationProto(time.Second * 0),
+		},
+	}
+)
+
+>>>>>>> c53277548... Remove SDS Timeout for default and root case
 // ConstructSdsSecretConfig constructs SDS Secret Configuration for workload proxy.
 func ConstructSdsSecretConfig(name, sdsUdsPath string) *auth.SdsSecretConfig {
 	if name == "" || sdsUdsPath == "" {

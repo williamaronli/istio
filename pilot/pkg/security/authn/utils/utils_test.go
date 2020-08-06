@@ -17,6 +17,9 @@ package utils
 import (
 	"reflect"
 	"testing"
+	"time"
+
+	"github.com/golang/protobuf/ptypes"
 
 	"github.com/davecgh/go-spew/spew"
 	auth "github.com/envoyproxy/go-control-plane/envoy/api/v2/auth"
@@ -24,7 +27,6 @@ import (
 	listener "github.com/envoyproxy/go-control-plane/envoy/api/v2/listener"
 	structpb "github.com/golang/protobuf/ptypes/struct"
 
-	"istio.io/istio/pilot/pkg/features"
 	"istio.io/istio/pilot/pkg/model"
 	"istio.io/istio/pilot/pkg/networking"
 	"istio.io/istio/pilot/pkg/networking/util"
@@ -162,7 +164,12 @@ func TestBuildInboundFilterChain(t *testing.T) {
 								{
 									Name: "default",
 									SdsConfig: &core.ConfigSource{
+<<<<<<< HEAD
 										InitialFetchTimeout: features.InitialFetchTimeout,
+=======
+										InitialFetchTimeout: ptypes.DurationProto(0 * time.Second),
+										ResourceApiVersion:  core.ApiVersion_V3,
+>>>>>>> c53277548... Remove SDS Timeout for default and root case
 										ConfigSourceSpecifier: &core.ConfigSource_ApiConfigSource{
 											ApiConfigSource: &core.ApiConfigSource{
 												ApiType: core.ApiConfigSource_GRPC,
@@ -184,7 +191,12 @@ func TestBuildInboundFilterChain(t *testing.T) {
 									ValidationContextSdsSecretConfig: &auth.SdsSecretConfig{
 										Name: "ROOTCA",
 										SdsConfig: &core.ConfigSource{
+<<<<<<< HEAD
 											InitialFetchTimeout: features.InitialFetchTimeout,
+=======
+											InitialFetchTimeout: ptypes.DurationProto(0 * time.Second),
+											ResourceApiVersion:  core.ApiVersion_V3,
+>>>>>>> c53277548... Remove SDS Timeout for default and root case
 											ConfigSourceSpecifier: &core.ConfigSource_ApiConfigSource{
 												ApiConfigSource: &core.ApiConfigSource{
 													ApiType: core.ApiConfigSource_GRPC,

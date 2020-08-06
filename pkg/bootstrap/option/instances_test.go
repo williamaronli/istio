@@ -515,8 +515,13 @@ func TestOptions(t *testing.T) {
 			key:      "envoy_metrics_service_tls",
 			option: option.EnvoyMetricsServiceTLS(&networkingAPI.ClientTLSSettings{
 				Mode: networkingAPI.ClientTLSSettings_ISTIO_MUTUAL,
+<<<<<<< HEAD
 			}, &model.NodeMetadata{}),
 			expected: "{\"common_tls_context\":{\"tls_certificates\":[{\"certificate_chain\":{\"filename\":\"/etc/certs/root-cert.pem\"},\"private_key\":{\"filename\":\"/etc/certs/key.pem\"}}],\"validation_context\":{\"trusted_ca\":{\"filename\":\"/etc/certs/cert-chain.pem\"}},\"alpn_protocols\":[\"istio\",\"h2\"]},\"sni\":\"envoy_metrics_service\"}", // nolint: lll
+=======
+			}, &model.BootstrapNodeMetadata{}),
+			expected: `{"name":"envoy.transport_sockets.tls","typed_config":{"@type":"type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext","common_tls_context":{"alpn_protocols":["istio","h2"],"combined_validation_context":{"default_validation_context":{},"validation_context_sds_secret_config":{"name":"ROOTCA","sds_config":{"api_config_source":{"api_type":"GRPC","grpc_services":[{"envoy_grpc":{"cluster_name":"sds-grpc"}}],"transport_api_version":"V3"},"initial_fetch_timeout":"0s","resource_api_version":"V3"}}},"tls_certificate_sds_secret_configs":[{"name":"default","sds_config":{"api_config_source":{"api_type":"GRPC","grpc_services":[{"envoy_grpc":{"cluster_name":"sds-grpc"}}],"transport_api_version":"V3"},"initial_fetch_timeout":"0s","resource_api_version":"V3"}}]},"sni":"envoy_metrics_service"}}`,
+>>>>>>> c53277548... Remove SDS Timeout for default and root case
 		},
 		{
 			testName: "envoy metrics keepalive nil",
@@ -585,8 +590,13 @@ func TestOptions(t *testing.T) {
 			key:      "envoy_accesslog_service_tls",
 			option: option.EnvoyAccessLogServiceTLS(&networkingAPI.ClientTLSSettings{
 				Mode: networkingAPI.ClientTLSSettings_ISTIO_MUTUAL,
+<<<<<<< HEAD
 			}, &model.NodeMetadata{}),
 			expected: "{\"common_tls_context\":{\"tls_certificates\":[{\"certificate_chain\":{\"filename\":\"/etc/certs/root-cert.pem\"},\"private_key\":{\"filename\":\"/etc/certs/key.pem\"}}],\"validation_context\":{\"trusted_ca\":{\"filename\":\"/etc/certs/cert-chain.pem\"}},\"alpn_protocols\":[\"istio\",\"h2\"]},\"sni\":\"envoy_accesslog_service\"}", // nolint: lll
+=======
+			}, &model.BootstrapNodeMetadata{}),
+			expected: `{"name":"envoy.transport_sockets.tls","typed_config":{"@type":"type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext","common_tls_context":{"alpn_protocols":["istio","h2"],"combined_validation_context":{"default_validation_context":{},"validation_context_sds_secret_config":{"name":"ROOTCA","sds_config":{"api_config_source":{"api_type":"GRPC","grpc_services":[{"envoy_grpc":{"cluster_name":"sds-grpc"}}],"transport_api_version":"V3"},"initial_fetch_timeout":"0s","resource_api_version":"V3"}}},"tls_certificate_sds_secret_configs":[{"name":"default","sds_config":{"api_config_source":{"api_type":"GRPC","grpc_services":[{"envoy_grpc":{"cluster_name":"sds-grpc"}}],"transport_api_version":"V3"},"initial_fetch_timeout":"0s","resource_api_version":"V3"}}]},"sni":"envoy_accesslog_service"}}`,
+>>>>>>> c53277548... Remove SDS Timeout for default and root case
 		},
 		{
 			testName: "envoy access log keepalive nil",

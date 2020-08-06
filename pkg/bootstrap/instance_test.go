@@ -355,10 +355,16 @@ func TestGolden(t *testing.T) {
 
 			checkOpencensusConfig(t, &realM, &goldenM)
 
+<<<<<<< HEAD
 			if !reflect.DeepEqual(realM, goldenM) {
 				s, _ := diff.PrettyDiff(goldenM, realM)
 				t.Logf("difference: %s", s)
 				t.Fatalf("\n got: %v\nwant: %v", realM, goldenM)
+=======
+			if diff := cmp.Diff(goldenM, realM, protocmp.Transform()); diff != "" {
+				t.Logf("difference: %s", diff)
+				t.Fatalf("\n got: %s\nwant: %s", prettyPrint(read), prettyPrint(jgolden))
+>>>>>>> c53277548... Remove SDS Timeout for default and root case
 			}
 
 			// Check if the LightStep access token file exists
