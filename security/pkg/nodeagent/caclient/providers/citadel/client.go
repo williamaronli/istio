@@ -83,6 +83,7 @@ func (c *citadelClient) CSRSign(ctx context.Context, reqID string, csrPEM []byte
 		Csr:              string(csrPEM),
 		ValidityDuration: certValidTTLInSec,
 	}
+
 	if token != "" {
 		// add Bearer prefix, which is required by Citadel.
 		token = bearerTokenPrefix + token
@@ -95,7 +96,12 @@ func (c *citadelClient) CSRSign(ctx context.Context, reqID string, csrPEM []byte
 		}
 	}
 
+
+
 	resp, err := c.client.CreateCertificate(ctx, req)
+	citadelClientLog.Infof("sssssss")
+	citadelClientLog.Infof("token: %+v",token)
+	citadelClientLog.Infof("err: %+v",err)
 	if err != nil {
 		citadelClientLog.Errorf("Failed to create certificate: %v", err)
 		return nil, err
