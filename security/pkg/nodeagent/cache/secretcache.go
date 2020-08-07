@@ -934,7 +934,7 @@ func (sc *SecretCache) shouldRotate(secret *security.SecretItem) bool {
 	secretLifeTime := secret.ExpireTime.Sub(secret.CreatedTime)
 	gracePeriod := time.Duration(sc.configOptions.SecretRotationGracePeriodRatio * float64(secretLifeTime))
 	rotate := time.Now().After(secret.ExpireTime.Add(-gracePeriod))
-	cacheLog.Debugf("Secret %s: lifetime: %v, graceperiod: %v, expiration: %v, should rotate: %v",
+	cacheLog.Infof("Secret %s: lifetime: %v, graceperiod: %v, expiration: %v, should rotate: %v",
 		secret.ResourceName, secretLifeTime, gracePeriod, secret.ExpireTime, rotate)
 	return rotate
 }
