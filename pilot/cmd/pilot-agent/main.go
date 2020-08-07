@@ -130,7 +130,7 @@ var (
 	trustDomainEnv = env.RegisterStringVar("TRUST_DOMAIN", "",
 		"The trust domain for spiffe certificates").Get()
 
-	secretTTLEnv = env.RegisterDurationVar("SECRET_TTL", 30*time.Second,
+	secretTTLEnv = env.RegisterDurationVar("SECRET_TTL", 24*time.Hour,
 		"The cert lifetime requested by istio agent").Get()
 
 	secretRotationGracePeriodRatioEnv = env.RegisterFloatVar("SECRET_GRACE_PERIOD_RATIO", 0.9998,
