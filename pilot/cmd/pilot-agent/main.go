@@ -127,12 +127,12 @@ var (
 	trustDomainEnv = env.RegisterStringVar("TRUST_DOMAIN", "",
 		"The trust domain for spiffe certificates").Get()
 
-	secretTTLEnv = env.RegisterDurationVar("SECRET_TTL", 24*time.Hour,
+	secretTTLEnv = env.RegisterDurationVar("SECRET_TTL", 60 *time.Second,
 		"The cert lifetime requested by istio agent").Get()
 
-	secretRotationGracePeriodRatioEnv = env.RegisterFloatVar("SECRET_GRACE_PERIOD_RATIO", 0.5,
+	secretRotationGracePeriodRatioEnv = env.RegisterFloatVar("SECRET_GRACE_PERIOD_RATIO", 0.9998,
 		"The grace period ratio for the cert rotation, by default 0.5.").Get()
-	secretRotationIntervalEnv = env.RegisterDurationVar("SECRET_ROTATION_CHECK_INTERVAL", 5*time.Minute,
+	secretRotationIntervalEnv = env.RegisterDurationVar("SECRET_ROTATION_CHECK_INTERVAL", 10*time.Second,
 		"The ticker to detect and rotate the certificates, by default 5 minutes").Get()
 	staledConnectionRecycleIntervalEnv = env.RegisterDurationVar("STALED_CONNECTION_RECYCLE_RUN_INTERVAL", 5*time.Minute,
 		"The ticker to detect and close stale connections").Get()
