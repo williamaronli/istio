@@ -53,12 +53,9 @@ func NewJwtAuthenticator(iss string, trustDomain, audience string) (*JwtAuthenti
 // Authenticate - based on the old OIDC authenticator for mesh expansion.
 func (j *JwtAuthenticator) Authenticate(ctx context.Context) (*Caller, error) {
 	bearerToken, err := extractBearerToken(ctx)
-	fmt.Printf("extractBearerToken")
 	if err != nil {
 		return nil, fmt.Errorf("ID token extraction error: %v", err)
 	}
-	fmt.Printf("bearerToken %+v\n", bearerToken);
-	fmt.Printf("ssssssssssssssssss")
 	idToken, err := j.verifier.Verify(context.Background(), bearerToken)
 	if err != nil {
 		return nil, fmt.Errorf("failed to verify the ID token (error %v)", err)

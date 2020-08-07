@@ -19,6 +19,7 @@ import (
 	"crypto/x509"
 	"fmt"
 	"net"
+	"strings"
 	"time"
 
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
@@ -26,6 +27,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/status"
 	"k8s.io/client-go/kubernetes"
@@ -43,6 +45,10 @@ const (
 	jwtPath              = "/var/run/secrets/kubernetes.io/serviceaccount/token"
 	caCertPath           = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
 	certExpirationBuffer = time.Minute
+
+	bearerTokenPrefix = "Bearer "
+	authorizationMeta = "authorization"
+	clusterIDMeta     = "clusterid"
 )
 
 var serverCaLog = log.RegisterScope("serverca", "Citadel server log", 0)
@@ -290,12 +296,35 @@ func (s *Server) authenticate(ctx context.Context) *authenticate.Caller {
 			errMsg += fmt.Sprintf("Authenticator %s at index %d got error: %v. ", authn.AuthenticatorType(), id, err)
 		}
 		if u != nil && err == nil {
-			serverCaLog.Debugf("Authentication successful through auth source %v", u.AuthSource)
+			serverCaLog.Infof("Authentication successful through auth source %v", u.AuthSource)
 			return u
 		}
 	}
+	bearerToken, _ := extractBearerToken(ctx)
+	serverCaLog.Infof("failed1111111211")
+	serverCaLog.Infof("token is %+v", bearerToken)
 	serverCaLog.Warnf("Authentication failed for %v: %s", getConnectionAddress(ctx), errMsg)
 	return nil
+}
+
+func extractBearerToken(ctx context.Context) (string, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return "", fmt.Errorf("no metadata is attached")
+	}
+
+	authHeader, exists := md[authorizationMeta]
+	if !exists {
+		return "", fmt.Errorf("no HTTP authorization header exists")
+	}
+
+	for _, value := range authHeader {
+		if strings.HasPrefix(value, bearerTokenPrefix) {
+			return strings.TrimPrefix(value, bearerTokenPrefix), nil
+		}
+	}
+
+	return "", fmt.Errorf("no bearer token exists in HTTP authorization header")
 }
 
 // shouldRefresh indicates whether the given certificate should be refreshed.
