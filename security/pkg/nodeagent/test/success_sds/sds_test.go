@@ -40,5 +40,5 @@ func TestProxySDS(t *testing.T) {
 			}
 		}
 		return nil
-	}, retry.Delay(1*time.Second), retry.Timeout(40*time.Second))
+	}, retry.Delay(1*time.Second), retry.Timeout(20*time.Second))
 }
