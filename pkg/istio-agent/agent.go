@@ -656,6 +656,7 @@ func (a *Agent) newSecretManager() (*cache.SecretManagerClient, error) {
 			log.Fatalf("invalid config - %s missing a root certificate %s", a.secOpts.CAEndpoint, caCertFile)
 		} else {
 			log.Infof("Using CA %s cert with certs: %s", a.secOpts.CAEndpoint, caCertFile)
+			log.Infof("sssssssssssssssssssssssss")
 		}
 	}
 
